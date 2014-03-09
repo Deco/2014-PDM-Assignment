@@ -1,2 +1,5 @@
 #gedit backups
 *~
+
+#python
+*.pyc
