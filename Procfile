@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath privilege privilege.wsgi:application
