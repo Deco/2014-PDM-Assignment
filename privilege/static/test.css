@@ -1,0 +1,32 @@
+
+body {
+    background-color: #000000;
+}
+
+#logo {
+    height: 90%;
+}
+
+
+.eyeBigCircle {
+    z-index: 9000;
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    /*outline-style: solid;
+    outline-color: black;
+    outline-width: 1px;*/
+}
+.eyeOutlineCircle {
+    z-index: 8999;
+    position: absolute;
+    border-radius: 50%;
+    background: black;
+}
+.eyeInnerCircle {
+    z-index: 9001;
+    position: absolute;
+    border-radius: 50%;
+    background: black;
+}
+

@@ -1,17 +1,20 @@
 <html>
-  {% load staticfiles %}
-  <head>
-    <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
-    <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
-  </head>
-<body bgcolor=black>
-<center>
-<img src="{% static "logo.png" %}" height=90% alt="logo"/>
-
-</center>
-
-<a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangopowered126x54_grey.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a>
-
-
+{% load staticfiles %}
+<head>
+  <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+  <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+  <link href="{% static "test.css" %}" rel="stylesheet" type="text/css">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+  <center>
+    <div id="content">
+      <img id="logo" src="{% static "logo.png" %}" alt="logo"></img>
+    </div>
+  </center>
+  
+  <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangopowered126x54_grey.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a>
+  
+  <script src="{% static "test.js" %}"></script>
 </body>
 </html>
