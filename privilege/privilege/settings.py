@@ -1,4 +1,5 @@
 # Django settings for privilege project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -6,6 +7,9 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+
+#Enables root relative paths further below...
+SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 MANAGERS = ADMINS
 
@@ -21,9 +25,10 @@ DATABASES = {
     }
 }
 
+
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.teamprivileged.com', '.team-privileged.herokuapp.com']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -61,7 +66,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(SITE_ROOT, '..', 'staticfiles')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -69,7 +74,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    'static/',
+    os.path.join(SITE_ROOT, '..', 'static'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -80,7 +85,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -90,7 +95,7 @@ SECRET_KEY = '%6pu#kwpe^plp=lonw(g_+)%*i6lev%h3yi_c5)=r!e$3*qv)k'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,7 +114,7 @@ ROOT_URLCONF = 'privilege.urls'
 WSGI_APPLICATION = 'privilege.wsgi.application'
 
 TEMPLATE_DIRS = (
-    'templates',
+    os.path.join(SITE_ROOT, '..', 'templates')
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -119,13 +124,14 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    # 'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'core',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
