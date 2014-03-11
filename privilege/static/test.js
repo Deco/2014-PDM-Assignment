@@ -45,7 +45,6 @@ function positionGooglyEyes() {
         eye.bigCircleEl
             .offset({ top: logoOffset.top+eye.y*logoHeight-size/2, left: logoOffset.left+eye.x*logoWidth-size/2 })
             .css("width", size).css("height", size)
-            //.css("outline-width", logoWidth*outlineScale)
         ;
         var size = logoWidth*smallCircleScale;
         var rx = logoOffset.left+eye.x*logoWidth;

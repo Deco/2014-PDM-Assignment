@@ -13,9 +13,6 @@ body {
     position: absolute;
     border-radius: 50%;
     background: white;
-    /*outline-style: solid;
-    outline-color: black;
-    outline-width: 1px;*/
 }
 .eyeOutlineCircle {
     z-index: 8999;
