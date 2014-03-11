@@ -1,2 +1,8 @@
 #python
 .*\.pyc
+
+# Virtualenv
+env
+
+# Django Jenkins
+reports
