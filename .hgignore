@@ -6,3 +6,6 @@ env
 
 # Django Jenkins
 reports
+
+# windows
+Thumbs\.db
