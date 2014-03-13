@@ -172,4 +172,12 @@ LOGGING = {
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
     'django_jenkins.tasks.run_pylint',
+    'django_jenkins.tasks.run_pep8',
+)
+
+# We do not want PyLint to check the DJango sources, just our app.
+# As per SO question:
+# http://stackoverflow.com/questions/6321205/django-jenkins-and-pylint-looking-at-everything
+PROJECT_APPS=(
+    'privilege',
 )
