@@ -179,7 +179,7 @@ JENKINS_TASKS = (
 # As per SO question:
 # http://stackoverflow.com/questions/6321205/django-jenkins-and-pylint-looking-at-everything
 PROJECT_APPS = (
-    'privilege',
+    'privilege/privilege',
 )
 
 # PEP8 Settings, relative to Jenkins execution command.
