@@ -178,6 +178,6 @@ JENKINS_TASKS = (
 # We do not want PyLint to check the DJango sources, just our app.
 # As per SO question:
 # http://stackoverflow.com/questions/6321205/django-jenkins-and-pylint-looking-at-everything
-PROJECT_APPS=(
+PROJECT_APPS = (
     'privilege',
 )
