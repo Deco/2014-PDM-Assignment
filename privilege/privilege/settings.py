@@ -182,4 +182,5 @@ PROJECT_APPS = (
     'privilege',
 )
 
-PEP8_RCFILE = '../pep8.cfg'
+# PEP8 Settings, relative to Jenkins execution command.
+PEP8_RCFILE = 'pep8.cfg'
