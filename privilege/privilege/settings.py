@@ -181,3 +181,5 @@ JENKINS_TASKS = (
 PROJECT_APPS = (
     'privilege',
 )
+
+PEP8_RCFILE = '../pep8.cfg'
