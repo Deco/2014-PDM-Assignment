@@ -6,6 +6,10 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
     '',
+
+    # Login template
+    url(r'^login/$', 'core.views.login'),
+
     # Examples:
     url(r'^$', 'core.views.home', name='home'),
     # url(r'^privilege/', include('privilege.foo.urls')),

@@ -6,3 +6,8 @@ def home(request):
     t = get_template('test.html')
     html = t.render(Context(None))
     return HttpResponse(html)
+
+def login(request):
+    t = get_template('login.html')
+    html = t.render(Context(None))
+    return HttpResponse(html)

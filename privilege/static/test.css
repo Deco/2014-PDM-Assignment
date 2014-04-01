@@ -1,12 +1,100 @@
 
 body {
     background-color: #000000;
+    color: #aaa;
+    font-family: "Lato", Helvetica, Arial, sans-serif;
+    margin: 0 auto 0 auto;
 }
 
 #logo {
     height: 90%;
 }
 
+.button:hover, .button:focus {
+    outline: none;
+    color: #fff;
+}
+
+.form-control {
+    border: 2px solid #bdc3c7;
+    color: #34495e;
+    font-size: 15px;
+    line-height: 1.467;
+    padding: 8px 12px;
+    height: 42px;
+    -webkit-appearance: none;
+    border-radius: 6px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -webkit-transition: border .25s linear, color .25s linear, background-color .25s linear;
+    transition: border .25s linear, color .25s linear, background-color .25s linear;
+}
+
+.form-control:focus {
+    border-color: #1a7bbc;
+    outline: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.button {
+    border: none;
+    line-height: 1.4;
+    border-radius: 4px;
+    padding: 10px 15px;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-transition: border .25s linear, color .25s linear, background-color .25s linear;
+    transition: border .25s linear, color .25s linear, background-color .25s linear;
+}
+
+#loginMasthead, #loginFooter {
+    text-align: center;
+}
+
+#loginMasthead {
+    border-bottom: 2px solid;
+}
+
+#loginFooter {
+    border-top: 2px solid;
+}
+
+#loginBox {
+    width: 30%;
+    margin: 0 auto 0 auto;
+}
+
+#loginBox h1, #loginBox h2 {
+}
+
+#loginBox .remember {
+    display: block;
+}
+
+#loginBox .remember input {
+    margin-right: 1em;
+}
+
+#loginBox input {
+    margin: 0.4em 0 0.4em 0;
+}
+
+#loginBox input[type=text], #loginBox input[type=password] {
+    display: block;
+    width: 100%;
+}
+
+#loginBox input[type=submit] {
+    float: left;
+}
+
+#loginExtras {
+    float: right;
+}
+
+#loginExtras a {
+    display: block;
+}
 
 .eyeBigCircle {
     z-index: 9000;
@@ -26,4 +114,3 @@ body {
     border-radius: 50%;
     background: black;
 }
-

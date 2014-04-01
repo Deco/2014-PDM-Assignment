@@ -1,0 +1,37 @@
+<html>
+  {% load staticfiles %}
+  <head>
+    <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+    <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+    <link href="{% static "test.css" %}" rel="stylesheet" type="text/css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  </head>
+
+  <body>
+    <div id="loginMasthead">
+      <span>Curtin University of Technology</span>
+    </div>
+
+    <div id="loginBox">
+      <h2>Blackbox</h2>
+      <h3>Research Data Storage</h3>
+      <form action="/login/" method="post">
+        <fieldset>
+          <legend>Login</legend>
+          <input class="form-control" type="text" name="username" placeholder="Username" required>
+          <input class="form-control" type="password" name="password" placeholder="Password" required>
+          <span class="remember"><input type="checkbox" name="rememberLogin">Remember for one week</span>
+          <input class="button" type="submit" value="Login">
+          <div id="loginExtras">
+            <a href="#">Create account</a>
+            <a href="#">Request assistance</a>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="loginFooter">
+      <span>Copyright 2014 &mdash; Team Privileged</span>
+    </div>
+  </body>
+</html>
