@@ -139,6 +139,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_jenkins',
     'core',
     'auth',
 )
@@ -173,3 +174,22 @@ LOGGING = {
         },
     }
 }
+
+# Jenkins tasks for Jenkin CI.
+# Check tutorial at: https://sites.google.com/site/kmmbvnr/home/django-jenkins-tutorial
+# Also, django-jenkins homepage: https://github.com/kmmbvnr/django-jenkins
+JENKINS_TASKS = (
+    'django_jenkins.tasks.with_coverage',
+    'django_jenkins.tasks.run_pylint',
+    'django_jenkins.tasks.run_pep8',
+)
+
+# We do not want PyLint to check the DJango sources, just our app.
+# As per SO question:
+# http://stackoverflow.com/questions/6321205/django-jenkins-and-pylint-looking-at-everything
+PROJECT_APPS = (
+    'privilege',
+)
+
+# PEP8 Settings, relative to Jenkins execution command.
+PEP8_RCFILE = '../pep8.cfg'

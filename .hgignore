@@ -1,2 +1,11 @@
 #python
 .*\.pyc
+
+# Virtualenv
+env
+
+# Django Jenkins
+reports
+
+# windows
+Thumbs\.db

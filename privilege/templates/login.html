@@ -1,13 +1,40 @@
+{% load staticfiles %}
 <html>
   <head>
-
+    <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+    <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+    <link href="{% static "default.css" %}" rel="stylesheet" type="text/css">
   </head>
-  <form action="{% url 'login' %}" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <input type="submit" value="Submit" />
 
   <body>
- 
+    <div id="loginMasthead">
+      <span>Curtin University of Technology</span>
+    </div>
+
+    <div id="loginBox">
+      <h2>Blackbox</h2>
+      <h3>Research Data Storage</h3>
+      <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <fieldset>
+          <legend>Login</legend>
+          {{ form.username.errors }}
+          {{ form.password.errors }}
+          <input class="form-control" type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" placeholder="{{ form.username.label }}" required>
+          <input class="form-control" type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="{{ form.password.label }}" required>
+          <span class="remember"><input type="checkbox" name="rememberLogin">Remember for one week</span>
+          <input class="button" type="submit" value="Login">
+          <div id="loginExtras">
+            <a href="#">Create account</a>
+            <a href="#">Request assistance</a>
+          </div>
+        </fieldset>
+      </form>
+    </div>
+
+    <div id="loginFooter">
+      <span>Copyright 2014 &mdash; Team Privileged</span>
+    </div>
   </body>
 </html>
