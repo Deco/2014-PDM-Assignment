@@ -62,7 +62,6 @@ body {
 
 #headerInfo {
     display: inline;
-
 }
 
 #headerInfo span {
@@ -79,7 +78,6 @@ body {
     max-width: 300px;
     height: auto;
     width: auto;
-
     margin-right: 10px;
     margin-left: 20px;
 }
@@ -107,11 +105,31 @@ body {
     overflow-x: hidden;
 }
 
+.blockTitle {
+    display: inline-block;
+    width: auto;
+    margin-top: 10px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: white;
+    font-size: 2em;
+    border: 1px solid black;
+    border-radius: 30px;
+}
+
 .blockItem {
     border: 1px solid black;
     border-radius: 5px;
     background-color: white;
     margin: 10px;
+    padding-left: 10px;
+}
+
+.blockItemTitle {
+    text-decoration: underline;
+    font-weight: bold;
+    font-size: 1.2em;
 }
 
 #dashboardNotifications {

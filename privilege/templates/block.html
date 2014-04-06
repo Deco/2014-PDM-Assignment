@@ -1,10 +1,12 @@
 <div id="{{ blockid }}" class="block">
-  <h2>
+  <span class="blockTitle">
     {{ title }}
-  </h2>
+  </span>
   {% for i in items %}
   <div class="blockItem">
-    {{i.title}}
+    <span class="blockItemTitle">
+      {{i.title}}
+    </span>
     <br>
     {{i.details}}
   </div>
