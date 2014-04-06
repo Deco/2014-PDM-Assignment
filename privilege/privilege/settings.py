@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'django_jenkins',
     'core',
     'auth',
+    'core.templatetags',
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

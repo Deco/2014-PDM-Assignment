@@ -1,0 +1,12 @@
+<div id="{{ blockid }}" class="block">
+  <h2>
+    {{ title }}
+  </h2>
+  {% for i in items %}
+  <div class="blockItem">
+    {{i.title}}
+    <br>
+    {{i.details}}
+  </div>
+  {% endfor %}
+</div>

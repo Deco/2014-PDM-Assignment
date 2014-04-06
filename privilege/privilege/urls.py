@@ -9,7 +9,7 @@ urlpatterns = patterns(
 
     url(r'^$', 'core.views.home', name='home'),
     url(r'^', include('auth.urls')),
-
+    url(r'^home/$', 'core.views.dashboard', name='dashboard'),
     # url(r'^privilege/', include('privilege.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

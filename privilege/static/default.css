@@ -98,6 +98,40 @@ body {
     border-top: 3px solid white;
 }
 
+.block {
+    border: 3px solid white;
+    border-radius: 5px;
+    background-color: gray;
+    margin: 10px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.blockItem {
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+    margin: 10px;
+}
+
+#dashboardNotifications {
+    width: 45%;
+    height: 45%;
+    float: left;
+}
+
+#dashboardFaculties {
+    width: 45%;
+    height: 45%;
+    float: left;
+}
+
+#dashboardProjects {
+    width: 50%;
+    height: 95%;
+    float: right;
+}
+
 #loginMasthead, #loginFooter {
     position: absolute;
     text-align: center;
