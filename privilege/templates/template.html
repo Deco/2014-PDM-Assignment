@@ -1,23 +1,34 @@
 <html>
+  {% load staticfiles %}
   <head>
     <title>Privileged Research Storage</title>
-    <link rel="stylesheet" type="text/css" href="../static/default.css">
+    <link rel="stylesheet" type="text/css" href="{% static "default.css" %}">
+    <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
+    <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
   </head>
   <body>
     <div id="templateHeader">
       <span id="pathText">Blackbox ></span>
       <span id="profilePicture" class="headerRight"><img src="../static/user.gif"></span>
       <div id="headerInfo" class="headerRight">
-        <span id="username">Cornelius Chase</span>
-        -
-        <span id="logoutButton">Logout</span>
+        {% if user.is_authenticated %}
+        <span id="username">{{ user.username }}</span>
+            -
+            <a style="color: white;" href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            Not logged in - <a style="color: white;" href="{% url 'login' %}">Login</a>
+        {% endif %}
         <br>
         <span>Dashboard account</span>
       </div>
     </div>
 
-    <div id="templateContent">Test</div>
+    <div id="templateContent">
+      {% block content %}
 
-    <div id="templateFooter">Test</div>
+      {% endblock %}
+    </div>
+
+    <div id="templateFooter">Copyright 2014 - Team Privileged</div>
   </body>
 </html>
