@@ -20,10 +20,26 @@ DATABASES = {
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'HOST': '',
+        'PORT': '',
     }
 }
+
+try: #except KeyError on 'HEROKU'
+    if os.environ['HEROKU']:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': 'dc30f6gnagor2u',
+                'USER': 'obopnfngjnhkcx',
+                'PASSWORD': os.environ['DBPW'],
+                'HOST': 'ec2-23-21-101-129.compute-1.amazonaws.com',
+                'PORT': '5432',
+            }
+        }
+
+except KeyError as inst: #KeyError is probable for the dev server as 'HEROKU' will not be in the env
+    print 'Ignoring Heroku PostgreSQL settings...'
 
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -136,7 +152,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'django_jenkins',
