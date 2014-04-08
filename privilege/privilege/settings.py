@@ -71,7 +71,7 @@ USE_TZ = True
 
 
 # URL which users will be redirected to after logging in
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/home"
 
 # URL which users will be redirected to if they fail authentication
 LOGIN_URL = "login/"
