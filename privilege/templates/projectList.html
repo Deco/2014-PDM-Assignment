@@ -1,0 +1,24 @@
+{% extends "template.html" %}
+{% load static %}
+{% load 1989 %}
+{% block path %}
+Project List
+{% endblock %}
+{% block content %}
+<div id="searchBox">
+  <input type="text">
+  <select>
+    <option value="role" selected=true>My Role</option>
+    <option value="update">Update Date</option>
+    <option value="create">Creation Date</option>
+    <option value="name">Name</option>
+    <option value="faculty">Faculty Name</option>
+    <option value="storage">Storage Space</option>
+    <option value="members">Member Count</option>
+  </select>
+</div>
+<div id="resultCountBox">
+  {{ count }} Results
+</div>
+{% partial "projectBlock.html" projects as projects%}
+{% endblock %}

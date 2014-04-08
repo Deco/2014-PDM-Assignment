@@ -9,7 +9,7 @@
   <body>
     <div id="templateHeader">
       <span id="pathText">Blackbox >{% block path %}{% endblock %}</span>
-      <span id="profilePicture" class="headerRight"><img src="../static/user.gif"></span>
+      <span id="profilePicture" class="headerRight"><img src="{% static "user.gif" %}"></span>
       <div id="headerInfo" class="headerRight">
         {% if user.is_authenticated %}
         <span id="username">{{ user.username }}</span>

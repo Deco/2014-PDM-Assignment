@@ -16,30 +16,30 @@ mockNotications = [
 ]
 
 mockFaculties = [
-    {'title':"Science and Engineering", 'details':"Approver, Data Manager(2)"},
-    {'title':"Department of Computing", 'details':"Principal Investigator (4)"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."}
+    {'name':"Science and Engineering", 'role':"Approver, Data Manager(2)", 'update':"14/04/2014", 'spaceUsed':"1024", 'spaceMax':"2048", 'memberCount':"6"},
+    {'name':"Department of Computing", 'role':"Principle Investigator (4)", 'update':"22/02/2012", 'spaceUsed':"2080", 'spaceMax':"4000", 'memberCount':"50"},
+    {'name':"Arts", 'role':"Administrator, Principle Investigator(9)", 'update':"05/02/2014", 'spaceUsed':"1024", 'spaceMax':"2048", 'memberCount':"10"},
+    {'name':"Law and Order", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"1024", 'spaceMax':"2048", 'memberCount':"12"},
+    {'name':"Medicine", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"250", 'spaceMax':"500", 'memberCount':"16"},
+    {'name':"Psychology", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"99", 'spaceMax':"288", 'memberCount':"4"},
+    {'name':"Architecture", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"104", 'spaceMax':"148", 'memberCount':"5"},
+    {'name':"Health Science", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"90", 'spaceMax':"204", 'memberCount':"17"},
+    {'name':"Business", 'role':"None", 'update':"14/4/2014", 'spaceUsed':"4", 'spaceMax':"100", 'memberCount':"2"}
 ]
 
 mockProjects = [
-    {'title':"Color Blindness in Computing", 'details':"School of Accounting"},
-    {'title':"Effects of cocaine on honey bees", 'details':"Department of Science and Engineering"},
-    {'title':"Swearing as a Response to Pain", 'details':"Department of Computing"},
-    {'title':"A Litterary Analysis of \"Bitches ain't shit\"", 'details':"Arts"},
-    {'title':"272 Days and 1.5m", 'details':"Computing Department"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."}
+    {'title':"Color Blindness in Computing", 'details':"School of Accounting", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Effects of cocaine on honey bees", 'details':"Department of Science and Engineering", 'faculty':"Department of Science and Engineering", 'spaceUsed':"4", 'spaceMax':"16", 'update':"28/04/2013", 'role':"Lead Investigator", 'memberCount':"3", 'create':"01/01/1970"},
+    {'title':"Swearing as a Response to Pain", 'details':"Department of Computing", 'faculty':"Department of Computing", 'spaceUsed':"99", 'spaceMax':"100", 'update':"20/04/1420", 'role':"Administrator", 'memberCount':"25", 'create':"01/01/1970"},
+    {'title':"A Litterary Analysis of \"Bitches ain't shit\"", 'details':"Arts", 'faculty':"Arts", 'spaceUsed':"1", 'spaceMax':"2", 'update':"09/02/2012", 'role':"Contributer", 'memberCount':"9", 'create':"01/01/1970"},
+    {'title':"272 Days and 1.5m", 'details':"Reddit", 'faculty':"Department of Computing", 'spaceUsed':"272", 'spaceMax':"365", 'update':"10/4/2014", 'role':"Lead Investigator", 'memberCount':"1.5", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"}
 ]
 
 mockProject = {
@@ -103,4 +103,18 @@ def faculty(request):
                              'projects': mockProjects[:5],
                              'members': members,
                              'faculty': mockFaculty}))
+    return HttpResponse(html)
+
+def projectList(request):
+    t = get_template('projectList.html')
+    html = t.render(Context({'user': request.user,
+                             'projects': mockProjects,
+                             'count': len(mockProjects)}))
+    return HttpResponse(html)
+
+def facultyList(request):
+    t = get_template('facultyList.html')
+    html = t.render(Context({'user': request.user,
+                             'faculties': mockFaculties,
+                             'count': len(mockFaculties)}))
     return HttpResponse(html)

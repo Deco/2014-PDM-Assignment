@@ -12,6 +12,8 @@ urlpatterns = patterns(
     url(r'^home/$', 'core.views.dashboard', name='dashboard'),
     url(r'^project/$', 'core.views.project', name='project'),
     url(r'^faculty/$', 'core.views.faculty', name='faculty'),
+    url(r'^view/projects/$', "core.views.projectList", name='projectList'),
+    url(r'^view/faculties/$', "core.views.facultyList", name='facultyList'),
     # url(r'^privilege/', include('privilege.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

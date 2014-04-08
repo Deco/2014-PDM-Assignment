@@ -1,0 +1,14 @@
+<div id="projectListBlock">
+  {% for p in projects %}
+  <div id="projectListBlockItem">
+    <span>Title: {{ p.title }}</span>
+    <div>Faculty: {{ p.faculty }}</div>
+    <div>Space: {{ p.spaceUsed }}GB of {{ p.spaceMax }}GB</div>
+    <div>Update Date: {{ p.update }}</div>
+    <div>My Role: {{ p.role }}</div>
+    <div>Member Count: {{ p.memberCount }}</div>
+    <div>Creation Date: {{ p.create }}</div>
+    <hr>
+  </div>
+  {% endfor %}
+</div>

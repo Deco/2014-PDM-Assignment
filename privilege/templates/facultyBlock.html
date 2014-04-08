@@ -1,0 +1,12 @@
+<div id="facultyListBlock">
+  {% for f in faculties %}
+  <div id="facultyListBlockItem">
+    <span>Name: {{ f.name }}</span>
+    <div>Space: {{ f.spaceUsed }}GB of {{ f.spaceMax }}GB</div>
+    <div>Update Date: {{ f.update }}</div>
+    <div>My Role: {{ f.role }}</div>
+    <div>Member Count: {{ f.memberCount }}</div>
+    <hr>
+  </div>
+  {% endfor %}
+</div>
