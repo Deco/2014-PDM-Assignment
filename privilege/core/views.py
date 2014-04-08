@@ -42,6 +42,32 @@ mockProjects = [
     {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."}
 ]
 
+mockProject = {
+    'title':"Swearing in Response to Pain",
+    'faculty':"Science and Engineering",
+    'role':"Data Manager",
+    'spaceUsed':"26.7",
+    'spaceMax':"50.0",
+    'create':"14/4/2014",
+    'update':"14/4/2014"
+}
+
+members = [
+    {'title':"Josh", 'details':"Project Manager"},
+    {'title':"Brad", 'details':"Admin"},
+    {'title':"Millie", 'details':"Lead InvestiGAYtor"},
+    {'title':"Adam", 'details':"Researcher"}
+]
+
+history = [
+    {'title':"Member Added", 'details':"Millie was added to project"},
+    {'title':"Database updated", 'details':"Data added to DB"},
+    {'title':"Report approved", 'details':"Report approvedby Josh"},
+    {'title':"Space Request denied", 'details':"Your request was denied by Josh"}
+]
+
+
+
 def home(request):
     t = get_template('test.html')
     html = t.render(Context({'user': request.user}))
@@ -53,4 +79,19 @@ def dashboard(request):
                              'notifications':mockNotications,
                              'faculties':mockFaculties,
                              'projects': mockProjects}))
+    return HttpResponse(html)
+
+def project(request):
+    t = get_template('project.html')
+    html = t.render(Context({'user': request.user,
+                             'project': mockProject,
+                             'members': members,
+                             'history': history}))
+    return HttpResponse(html)
+
+def faculty(request):
+    t = get_template('faculty.html')
+    html = t.render(Context({'user': request.user,
+                             'projects': mockProjects[:5],
+                             'members': members}))
     return HttpResponse(html)

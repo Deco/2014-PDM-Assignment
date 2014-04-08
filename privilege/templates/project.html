@@ -1,0 +1,21 @@
+{% extends "template.html" %}
+{% load static %}
+{% load 1989 %}
+{% block path %}
+Projects
+{% endblock %}
+{% block content %}
+<div id="projectSummary">
+  Project Title: {{ project.title }}
+  <br>
+  <div id="projectFaculty">Faculty: {{ project.faculty }}</div>
+  <div id="projectCreationDate">Creation Date: {{ project.create }}</div>
+  <div id="projectRole">My Role: {{ project.role }}</div>
+  <div id="projectUpdateDate">Update Date: {{ project.update }}</div>
+  <div id="projectSpace">Storage Space: {{ project.spaceUsed }}GB of {{ project.spaceMax }}GB (54.3%)</div>
+  <div id="projectRequestSpace">Request More Space</div>
+  <hr>
+</div>
+{% partial "block.html" "Members" as title and "projectMembers" as blockid and members as items %}
+{% partial "block.html" "Project History" as title and "projectHistory" as blockid and history as items %}
+{% endblock %}
