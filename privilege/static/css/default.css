@@ -85,7 +85,16 @@ body {
 #templateContent {
     width: 100%;
     height: 85%;
-    color: blue;
+    color: black;
+
+    background: rgb(208,228,247); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(208,228,247,1) 0%, rgba(115,177,231,1) 33%, rgba(10,119,213,1) 100%, rgba(83,159,225,1) 100%, rgba(135,188,234,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(208,228,247,1)), color-stop(33%,rgba(115,177,231,1)), color-stop(100%,rgba(10,119,213,1)), color-stop(100%,rgba(83,159,225,1)), color-stop(100%,rgba(135,188,234,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', endColorstr='#87bcea',GradientType=0 ); /* IE6-9 */
 }
 
 #templateFooter {
@@ -97,11 +106,15 @@ body {
 }
 
 .block {
-    border: 3px solid white;
+    display: block;
+
+    border: 2px solid black;
     border-radius: 5px;
-    background-color: gray;
+    background-color: #005695;
+
     margin: 10px;
-    overflow: scroll;
+    overflow-y: visible;
+
     overflow-x: hidden;
 }
 
@@ -112,16 +125,17 @@ body {
     margin-left: 10px;
     padding-left: 10px;
     padding-right: 10px;
-    background-color: white;
+    background-color: #b9d5f0;;
     font-size: 2em;
     border: 1px solid black;
     border-radius: 30px;
+    color: black; 
 }
 
 .blockItem {
     border: 1px solid black;
     border-radius: 5px;
-    background-color: white;
+    background-color: #b9d5f0;
     margin: 10px;
     padding-left: 10px;
 }
@@ -134,19 +148,17 @@ body {
 
 #dashboardNotifications {
     width: 45%;
-    height: 45%;
     float: left;
 }
 
 #dashboardFaculties {
     width: 45%;
-    height: 45%;
     float: left;
+
 }
 
 #dashboardProjects {
     width: 50%;
-    height: 95%;
     float: right;
 }
 
