@@ -69,10 +69,3 @@ class SpaceRequest(models.Model):
 
     def __unicode__(self):
         return str(self.project) + ' ' + str(self.date_requested) + ' (' + str(self.size) + ')'
-
-
-
-
-
-
-

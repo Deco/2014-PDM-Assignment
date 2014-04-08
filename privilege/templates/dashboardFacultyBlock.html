@@ -1,0 +1,16 @@
+<div id="{{ blockid }}" class="block">
+  <span class="blockTitle">
+    {{ title }}
+  </span>
+  {% for i in items %}
+  {% if i.role != "None" %}
+  <div class="blockItem">
+    <span class="blockItemTitle">
+      {{i.name}}
+    </span>
+    <br>
+    {{i.role}}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
