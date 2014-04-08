@@ -1,0 +1,19 @@
+{% extends "template.html" %}
+{% load static %}
+{% load 1989 %}
+{% block path %}
+Faculty
+{% endblock %}
+{% block content %}
+<div id="facultySummary">
+  Faculty Name: {{ faculty.name }}
+  <br>
+  <div id="facultyRole">My Roles: {{ faculty.roles }}</div>
+  <div id="facultyCreationDate">Creation Date: {{ faculty.create }}</div>
+  <div id="facultySpace">Storage Space: {{ faculty.spaceUsed }}GB of {{ faculty.spaceMax }}GB</div>
+  <div id="facultyRequestProject">Submit Project Request</div>
+  <hr>
+</div>
+{% partial "block.html" "Managers" as title and "projectMembers" as blockid and members as items %}
+{% partial "block.html" "Project List" as title and "projectHistory" as blockid and projects as items %}
+{% endblock %}

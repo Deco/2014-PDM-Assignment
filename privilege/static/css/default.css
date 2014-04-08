@@ -164,13 +164,13 @@ body {
     float: right;
 }
 
-#projectSummary {
+#projectSummary, #facultySummary {
     display: block;
     border:1px solid black;
     margin: 10px 10px 0 10px;
 }
 
-#projectSummary hr {
+#projectSummary hr, #facultySummary hr {
     display: block;
     clear: both;
     visibility: hidden;
@@ -181,17 +181,17 @@ body {
     margin-left: 2em;
 }
 
-#projectRole {
+#projectRole, #facultyRole{
     clear: both;
     float: left;
 }
 
-#projectSpace {
+#projectSpace, #facultySpace {
     clear: both;
     float: left;
 }
 
-#projectCreationDate, #projectUpdateDate {
+#projectCreationDate, #projectUpdateDate, #facultyCreationDate {
     float: right;
     margin-right: 2em;
 }
@@ -215,6 +215,18 @@ body {
 #projectHistory {
     width: 50%;
     float: left;
+}
+
+#facultyRequestProject {
+    clear: both
+    display: block;
+    padding: 5px;
+    margin-right: 2em;
+    margin-top: 1em;
+    float: right;
+    border: 1px solid black;
+    border-radius: 20px;
+    background-color: white;
 }
 
 #loginMasthead, #loginFooter {

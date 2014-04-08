@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.template import Context
 from django.template.loader import get_template
-from django.contrib.auth.decorators import login_required
 
 mockNotications = [
     {'title':"Request Approved - more space", 'details':"Project: Color Blindness in Computing"},
@@ -67,6 +66,14 @@ history = [
     {'title':"Space Request denied", 'details':"Your request was denied by Josh"}
 ]
 
+mockFaculty = {
+    'name':"Science and Engineering",
+    'spaceUsed':"25",
+    'spaceMax':"60",
+    'roles':"Approver, Principal Inverigator(3), Data Manager (1), Contributer(6)",
+    'create':"14/4/2014"
+}
+
 
 
 def home(request):
@@ -74,7 +81,6 @@ def home(request):
     html = t.render(Context({'user': request.user}))
     return HttpResponse(html)
 
-@login_required(login_url='/login/')
 def dashboard(request):
     t = get_template('dashboard.html')
     html = t.render(Context({'user': request.user,
@@ -95,5 +101,6 @@ def faculty(request):
     t = get_template('faculty.html')
     html = t.render(Context({'user': request.user,
                              'projects': mockProjects[:5],
-                             'members': members}))
+                             'members': members,
+                             'faculty': mockFaculty}))
     return HttpResponse(html)
