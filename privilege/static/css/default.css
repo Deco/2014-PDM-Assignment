@@ -52,8 +52,17 @@ body {
 #templateHeader {
     width: 100%;
     height: 10%;
-    color: red;
-    border-bottom: 2px solid white;
+    color: black;
+    border-bottom: 2px solid black;
+    background: rgb(208,228,247); /* Old browsers */
+	background: -moz-linear-gradient(top, rgba(208,228,247,1) 0%, rgba(115,177,231,1) 33%, rgba(10,119,213,1) 100%, rgba(83,159,225,1) 100%, rgba(135,188,234,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(208,228,247,1)), color-stop(33%,rgba(115,177,231,1)), color-stop(100%,rgba(10,119,213,1)), color-stop(100%,rgba(83,159,225,1)), color-stop(100%,rgba(135,188,234,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom, rgba(208,228,247,1) 0%,rgba(115,177,231,1) 33%,rgba(10,119,213,1) 100%,rgba(83,159,225,1) 100%,rgba(135,188,234,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', endColorstr='#87bcea',GradientType=0 ); /* IE6-9 */
+
 }
 
 .headerRight {
@@ -166,14 +175,28 @@ body {
 
 #projectSummary, #facultySummary {
     display: block;
-    border:1px solid black;
-    margin: 10px 10px 0 10px;
+    width: 97%;
+    background-color: #005695;
+    border: 2px solid black;
+    border-radius: 5px;
+    margin: 10px 10px 0px 10px;
+}
+
+#projectTitle {
+    display: block;
+    width: 97%;
+    border: 2px solid black;
+    border-radius: 5px;
+    margin: 10px 10px 10px 10px;
+    font-weight: bold;
+    background-color: #b9d5f0;
 }
 
 #projectSummary hr, #facultySummary hr {
     display: block;
     clear: both;
     visibility: hidden;
+    background-color: #b9d5f0;
 }
 
 #projectFaculty, #projectRole {
@@ -189,11 +212,20 @@ body {
 #projectSpace, #facultySpace {
     clear: both;
     float: left;
+    margin-left: 2em;
 }
 
 #projectCreationDate, #projectUpdateDate, #facultyCreationDate {
     float: right;
     margin-right: 2em;
+}
+
+#projectContent {
+    display: block;
+    background-color: #b9d5f0;
+    border: 1px solid black;
+    margin: 10px 10px 0px 10px;
+
 }
 
 #projectRequestSpace {
@@ -204,6 +236,7 @@ body {
     margin-top: 1em;
     float: right;
     border: 1px solid black;
+    border-radius: 20px;
     background-color: white;
 }
 

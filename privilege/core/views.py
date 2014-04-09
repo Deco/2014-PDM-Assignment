@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.template import Context
 from django.template.loader import get_template
+from django.contrib.auth.decorators import login_required
 
 mockNotications = [
     {'title':"Request Approved - more space", 'details':"Project: Color Blindness in Computing"},
@@ -81,6 +82,7 @@ def home(request):
     html = t.render(Context({'user': request.user}))
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def dashboard(request):
     t = get_template('dashboard.html')
     html = t.render(Context({'user': request.user,
@@ -89,6 +91,7 @@ def dashboard(request):
                              'projects': mockProjects}))
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def project(request):
     t = get_template('project.html')
     html = t.render(Context({'user': request.user,
@@ -97,6 +100,7 @@ def project(request):
                              'history': history}))
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def faculty(request):
     t = get_template('faculty.html')
     html = t.render(Context({'user': request.user,
@@ -105,6 +109,7 @@ def faculty(request):
                              'faculty': mockFaculty}))
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def projectList(request):
     t = get_template('projectList.html')
     html = t.render(Context({'user': request.user,
@@ -112,6 +117,7 @@ def projectList(request):
                              'count': len(mockProjects)}))
     return HttpResponse(html)
 
+@login_required(login_url='/login/')
 def facultyList(request):
     t = get_template('facultyList.html')
     html = t.render(Context({'user': request.user,
