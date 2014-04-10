@@ -4,16 +4,15 @@ from django.template.loader import get_template
 from django.contrib.auth.decorators import login_required
 
 mockNotications = [
-    {'title':"Request Approved - more space", 'details':"Project: Color Blindness in Computing"},
-    {'title':"Member Added - Dee Doss", 'details':"Project: Swearing as a respose to pain"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet."}
+    {'title':"Request Approved - More Space", 'details':"Project: Color Blindness in Computing"},
+    {'title':"Member Added - Dee Doss", 'details':"Project: Swearing as a Respose to Pain"},
+    {'title':"Member Added - Brad Schoone", 'details':"Project: 272 Days and 1.5m"},
+    {'title':"Database Updated", 'details':"Project: Color Blindness in Computing"},
+    {'title':"Request Denied - New Project", 'details':"Project: Determining the Ballmer Peak"},
+    {'title':"Member Removed - Geoff", 'details':"Project: Effects of cocaine on honey bees"},
+    {'title':"Request Approved - More Space", 'details':"Swearing as a Response to Pain"},
+    {'title':"Request Approved - New Project", 'details':"Project: Lorem ipsum - When to use Filler"},
+    {'title':"Member Added - Geoff", 'details':"Projects: Effects of cocaine on honey bees"},
 ]
 
 mockFaculties = [
@@ -34,13 +33,8 @@ mockProjects = [
     {'title':"Swearing as a Response to Pain", 'details':"Department of Computing", 'faculty':"Department of Computing", 'spaceUsed':"99", 'spaceMax':"100", 'update':"20/04/1420", 'role':"Administrator", 'memberCount':"25", 'create':"01/01/1970"},
     {'title':"A Litterary Analysis of \"Bitches ain't shit\"", 'details':"Arts", 'faculty':"Arts", 'spaceUsed':"1", 'spaceMax':"2", 'update':"09/02/2012", 'role':"Contributer", 'memberCount':"9", 'create':"01/01/1970"},
     {'title':"272 Days and 1.5m", 'details':"Reddit", 'faculty':"Department of Computing", 'spaceUsed':"272", 'spaceMax':"365", 'update':"10/4/2014", 'role':"Lead Investigator", 'memberCount':"1.5", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
-    {'title':"Filler", 'details':"Lorem ipsum dolor sit amet.", 'faculty':"Arts", 'spaceUsed':"20", 'spaceMax':"50", 'update':"14/4/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"}
+    {'title':"Mockito - To Kill a Mocking Class", 'details':"Department of Computing", 'faculty':"ArtsDepartment of Computing", 'spaceUsed':"2", 'spaceMax':"12", 'update':"14/09/2013", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"},
+    {'title':"Using OpenStack for Great Good", 'details':"Department of Computing", 'faculty':"Department of Computing", 'spaceUsed':"29", 'spaceMax':"45", 'update':"01/04/2014", 'role':"Contributer", 'memberCount':"6", 'create':"01/01/1970"}
 ]
 
 mockProject = {
@@ -56,7 +50,7 @@ mockProject = {
 members = [
     {'title':"Josh", 'details':"Project Manager"},
     {'title':"Brad", 'details':"Admin"},
-    {'title':"Millie", 'details':"Lead InvestiGAYtor"},
+    {'title':"Millie", 'details':"Lead Investigator"},
     {'title':"Adam", 'details':"Researcher"}
 ]
 
