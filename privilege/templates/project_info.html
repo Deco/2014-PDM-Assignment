@@ -18,8 +18,17 @@
       <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
       <div class="well list-well">
         <div id="faculty-box" class="listBox">
-          {% for user in project_members %}
-            {% include "cards/user.html" with cardType="project_member_list" %}
+          {% for member_info in project_members %}
+            <div class="listEntry list-group-item">
+              <span class="listEntryTitle">
+                <div>
+                  <a href="/user/{{ member_info.user.id }}">{{ member_info.user.first_name }} {{ member_info.user.last_name }}</a>
+                </div>
+                <div>
+                  {{ member_info.role }}
+                </div>
+              </span>
+            </div>
           {% endfor %}
         </div>
       </div>
@@ -27,7 +36,7 @@
   </div>
   <div class="col-md-7">
     <div class="dashboard-div">
-      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Project History</h2>
+      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Request History</h2>
       <div class="well list-well">
         <div id="faculty-box" class="listBox">
           stuff

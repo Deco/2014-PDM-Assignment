@@ -28,24 +28,24 @@ class Command(BaseCommand):
             facultyCount = 8 #len(self.facultyChoices)
             projectsPerFacultyCount = 7
             for facultyI in range(facultyCount):
-                randomUsers = random.sample(userList, random.randrange(1, 6))
-                print(zip(randomUsers, ['M', 'A', 'A', 'A', 'A', 'M']))
+                randomUsers = random.sample(userList, random.randrange(5, 15))
                 faculty = self._make_faculty(
                     self.facultyChoices[facultyI],
-                    zip(randomUsers, ['M', 'A', 'A', 'A', 'A', 'M'])
+                    zip(randomUsers, ['M', 'A', 'A', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M'])
                 )
                 facultyList.append(faculty)
                 
                 for projectI in range(projectsPerFacultyCount):
-                    randomUsers = random.sample(userList, random.randrange(2, 10))
+                    randomUsers = random.sample(userList, random.randrange(8, 25))
                     self._make_project(
                         self.projectChoices.pop(), #title
                         faculty,
-                        zip(randomUsers, ['P','M','R','C','R','C','M','R','C','M'])
+                        zip(randomUsers, ['P','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M'])
                     )
 
 
     def _make_user(self, username, first_name, last_name, password, is_admin):
+        print(username, first_name, last_name, password)
         return self._make(User,
             username=username,
             first_name=first_name, last_name=last_name,

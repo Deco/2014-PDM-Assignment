@@ -10,10 +10,7 @@
 {% if cardType == "project_member_list" %}
   <div class="listEntry list-group-item">
     <span class="listEntryTitle">
-      <p>
-          <a href="/user/{{ user.id }}">{{ member.user.first_name }} {{ member.user.last_name }}</a>
-          <span>- {{ member.role }}</span>
-      </p>
+      <a href="/user/{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</a>
     </span>
   </div>
 {% endif %}

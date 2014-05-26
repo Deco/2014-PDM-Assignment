@@ -1,0 +1,104 @@
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Faculty {{ faculty.id }}</span>
+{% endblock %}
+
+{% block 'body' %}
+  <div class="col-md-12">
+    <div class="dashboard-div">
+      <div class="well list-well">
+        <div class="row">
+          <div class="col-xs-2 project-info-title-label">
+            Faculty Title:
+          </div>
+          <div class="col-md-10 project-info-title">
+            {{ faculty_name }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-2 project-info-detail-label">
+            Creation Date:
+          </div>
+          <div class="col-md-3 project-info-detail">
+            {{ faculty_creation_date }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-2 project-info-detail-label">
+            My Role:
+          </div>
+          <div class="col-md-5 project-info-detail">
+            {{ faculty_user_role }}
+          </div>
+          <div class="col-xs-2 project-info-detail-label">
+            Update Date:
+          </div>
+          <div class="col-md-3 project-info-detail">
+            {{ faculty_update_date }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-2 project-info-detail-label">
+            Storage Space:
+          </div>
+          <div class="col-md-6 project-info-detail">
+            <div class="progress progress-striped active project-info-storage-progress">
+              <div class="project-info-storage">
+                {{ faculty.storage_used_mb }}MB of {{ faculty.storage_capacity_mb }}MB ({{ faculty_storage_used_percent }}%)
+              </div>
+              <div class="progress-bar progress-bar project-info-storage-bar" style="width: {{ project_storage_used_percent }}%"> 
+              </div>
+              <div class="progress-bar progress-bar-info project-info-storage-bar" style="width: {{ project_storage_free_percent }}%"></div>
+            </div>
+          </div>
+          <div class="col-md-4">
+              <div class="btn-group">
+                {% if faculty_user_role == "Data Manager" %}
+                  <a href="/project/{{ project.id }}/request"><div class="btn btn-default">Request Additional Space</div></a>
+                {% endif %}
+                <a href="/project/{{ project.id }}/edit"><div class="btn btn-default">Edit Project</div></a>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="dashboard-div">
+      <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
+      <div class="well list-well">
+        <div id="faculty-box" class="listBox">
+          {% for member_info in faculty_members %}
+            <div class="listEntry list-group-item">
+              <span class="listEntryTitle">
+                <div>
+                  <a href="/user/{{ member_info.user.id }}">{{ member_info.user.first_name }} {{ member_info.user.last_name }}</a>
+                </div>
+                <div>
+                  {{ member_info.role }}
+                </div>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="dashboard-div">
+      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Faculty History</h2>
+      <div class="well list-well">
+        <div id="faculty-box" class="listBox">
+          stuff
+        </div>
+      </div>
+    </div>
+  </div>
+  things
+  {% for form in faculty_membership_formset %}
+    {{ form.as_p }}
+  {% endfor %}
+{% endblock %}
+

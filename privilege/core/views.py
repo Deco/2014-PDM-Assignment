@@ -10,7 +10,7 @@ from core.models import *
 from core.forms import *
 from django.forms.models import modelformset_factory
 from django.views.generic import CreateView, UpdateView
-from django.db.models import Q
+from django.db.models import Sum
 
 @login_required(login_url='/login')
 def view_dashboard(request):
@@ -30,18 +30,19 @@ def view_dashboard(request):
         
         role_count_dict = {}
         for project_membership in faculty_project_membership_qs:
-            role_count_dict[project_membership.get_role_nice()] = (role_count_dict[project_membership.get_role_nice()] or 0)+1
+            role_count_dict[project_membership.get_role_nice()] = role_count_dict.get(project_membership.get_role_nice(), 0)+1
         
-        role_list = {
+        role_list = [
             {'name': "Manager"               , 'count': faculty_membership and faculty_membership.role == FacultyMembership.MANAGER  and -1 or 0},
             {'name': "Approver"              , 'count': faculty_membership and faculty_membership.role == FacultyMembership.APPROVER and -1 or 0},
-            {'name': "Principal Investigator", 'count': role_count_dict["Principal Investigator"] or 0},
-            {'name': "Data Manager"          , 'count': role_count_dict["Data Manager"]           or 0},
-            {'name': "Collaborator"          , 'count': role_count_dict["Collaborator"]           or 0},
-            {'name': "Researcher"            , 'count': role_count_dict["Researcher"]             or 0},
-        }
+            {'name': "Principal Investigator", 'count': role_count_dict.get("Principal Investigator", 0)},
+            {'name': "Data Manager"          , 'count': role_count_dict.get("Data Manager"          , 0)},
+            {'name': "Collaborator"          , 'count': role_count_dict.get("Collaborator"          , 0)},
+            {'name': "Researcher"            , 'count': role_count_dict.get("Researcher"            , 0)},
+        ]
         
         context['faculties'].append({
+            'id': faculty.id,
             'name': faculty.name,
             'role_list': role_list,
         })
@@ -50,6 +51,7 @@ def view_dashboard(request):
     for project in projects_qs:
         membership = project.get_membership(request.user)
         context['projects'].append({
+            'id': project.id,
             'title': project.title,
             'faculty': project.faculty,
             'storage_capacity_mb': project.storage_capacity_mb,
@@ -76,19 +78,62 @@ def view_faculty_list(request):
 
 @login_required(login_url='/login')
 def view_faculty_info(request, id=None):
-    faculty = Faculty.objects.get(pk=id)
     template = "faculty_info.html"
-    context = {'faculty': faculty}
+    context = {}
     
+    try:
+        faculty = Faculty.objects.get(pk=id)
+    except Faculty.DoesNotExist:
+        return view_error(request, "Faculty with ID {} does not exist.".format(id))
     
-    FacultyMe
-    if Faculty
+    context['faculty_name'] = faculty.name
+    context['faculty_update_time'] = faculty.update_time
+    context['faculty_creation_time'] = faculty.creation_time
+    context['faculty_members'] = []
+    for faculty_member in faculty.members.all().order_by("last_name"):
+        membership = faculty.get_membership(faculty_member)
+        context['faculty_members'].append({
+            'user': faculty_member,
+            'role': membership and membership.get_role_nice() or "—"
+        })
+    context['faculty_storage_used_mb'] = Project.objects.filter(faculty=faculty).aggregate(Sum('storage_used_mb'))['storage_used_mb__sum']
+    context['faculty_storage_claimed_mb'] = Project.objects.filter(faculty=faculty).aggregate(Sum('storage_capacity_mb'))['storage_capacity_mb__sum']
     
+    if context['faculty_storage_claimed_mb'] > 0:
+        context['faculty_storage_used_percent'] = int(100*context['faculty_storage_used_mb']/context['faculty_storage_claimed_mb'])
+        context['faculty_storage_free_percent'] = 100-int(100*context['faculty_storage_used_mb']/context['faculty_storage_claimed_mb'])
+    else:
+        context['faculty_storage_used_percent'] = 0
+        context['faculty_storage_free_percent'] = 100
     
+    try:
+        membership = FacultyMembership.objects.get(faculty=faculty, member=request.user)
+        context['faculty_user_role'] = dict(FacultyMembership.FACULTY_ROLES).get(membership.role, 'unknown')
+    except FacultyMembership.DoesNotExist:
+        membership = None
+        context['faculty_user_role'] = "—"
+    
+    if membership and membership.role == "M":
+        
+        formset = modelformset_factory(
+                FacultyMembership,
+                form=FacultyMembershipForm,
+                extra=5
+            )
+            
+        if request.method == "GET":
+            formset = formset(queryset=faculty.facultymembership_set.all())
+            context['faculty_membership_formset'] = formset
+            
+        if request.method == "POST":
+            formset = formset(request.POST, queryset=faculty.facultymembership_set.all())
+            
+            if formset.is_valid():
+                formset.save()
+            
+        context['faculty_membership_formset'] = formset  
     
     return render(request, template, context)
-    
-    
 
 @login_required(login_url='/login')
 def view_faculty_form(request, id=None):
@@ -107,21 +152,20 @@ def view_project_list(request):
 
 @login_required(login_url='/login')
 def view_project_info(request, id=None):
-    # need to filter by permissions here
+    template = 'project_info.html'
+    context = {}
+    
     try:
         project = Project.objects.get(id=id)
     except Project.DoesNotExist:
         return view_error(request, "Project with ID {} does not exist.".format(id))
     
-    context = {}
-    template = 'project_info.html'
-    
     context['project'] = project
     context['project_members'] = []
-    for projectMember in project.members.all().order_by("last_name"):
-        membership = project.get_membership(projectMember)
+    for project_member in project.members.all().order_by("last_name"):
+        membership = project.get_membership(project_member)
         context['project_members'].append({
-            'user': projectMember,
+            'user': project_member,
             'role': membership and membership.get_role_nice() or "—"
         })
     
@@ -249,7 +293,4 @@ def view_error(request, error_msg):
     context['message'] = error_msg
     
     return render(request, template, context)
-
-
-
 

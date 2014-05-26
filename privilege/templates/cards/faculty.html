@@ -5,7 +5,16 @@
       <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
     </div>
     <span class="listEntryDetail">
-      {{ faculty.user_role }}
+      {% for role in faculty.role_list %}
+        {% if role.count != 0 %}
+          <span>
+            {{ role.name }}
+            {% if role.count > 0 %}
+              &nbsp;<span>({{ role.count }})</span>
+            {% endif %} 
+          </span>
+        {% endif %}
+      {% endfor %}
     </span>
   </div>
 {% endif %}
@@ -46,15 +55,6 @@
 
 {% if cardType == "label" %}
   <a href="/faculty/{{ faculty.id }}">{{ faculty }}</a>
-{% endif %}
-
-{% if cardType == "full" %}
-  <div class="stuff">
-    <span class="stuff">stuff</span>
-    {% comment %}
-        Put stuff for the full faculty page here.
-    {% endcomment %}
-  </div>
 {% endif %}
 
 {% comment %}
