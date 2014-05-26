@@ -1,0 +1,17 @@
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Create Request</span>
+{% endblock %}
+
+{% block 'body' %}
+    <form action="" method="post">{% csrf_token %}
+        {{ form.as_p }}
+        {% if is_new %}
+          <input type="submit" value="Create" />
+        {% else %}
+          <input type="submit" value="Update" />
+        {% endif %}
+    </form>
+{% endblock %}

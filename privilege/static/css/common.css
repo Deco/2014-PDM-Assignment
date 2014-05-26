@@ -1,0 +1,312 @@
+
+body {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.list-well {
+    padding: 6px;
+}
+
+.listEntry {
+    
+}
+
+.listEntryTitle {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.content-row {
+    margin-top: 70px;
+}
+
+.content-col {
+    /* height: 80vh;*/
+}
+
+#notification-box {
+    min-height: 15%;
+    max-height: 30%;
+    overflow: auto;
+}
+
+#faculty-box {
+    min-height: 15%;
+    max-height: 30%;
+    overflow: auto;
+}
+
+#project-box {
+    min-height: 30%;
+    max-height: 70%;
+    min-height: 70%;
+    overflow: auto;
+}
+
+.notification-absence-text {
+    /*font-style: italic;*/
+    padding-top: 30px;
+    text-align: center;
+    color: #888899;
+}
+
+.dashboard-div {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.dashboard-project-faculty {
+    float: left;
+}
+.dashboard-project-role {
+    float: right;
+}
+
+.crumb-root {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 36px;
+    font-weight: 500;
+    height: 69px;
+    line-height: 39.599998474121094px;
+}
+
+.crumb-sep {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin-left: 8px;
+    margin-right: 8px;
+    height: 69px;
+    line-height: 39.599998474121094px;
+    margin-top: 0px;
+}
+
+.crumb-part {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+    height: 69px;
+    line-height: 39.599998474121094px;
+    text-align: center;
+    margin-top: 0px;
+}
+.edgebar {
+    background-color: rgb(111, 84, 153);
+    background-image: linear-gradient(rgb(86, 61, 124) 0px, rgb(111, 84, 153) 100%);
+    background-repeat: repeat-x;
+    box-sizing: border-box;
+    color: rgb(205, 191, 227);
+    display: block;
+    text-align: left;
+    text-shadow: rgba(0, 0, 0, 0.0980392) 0px 1px 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.userbox {
+    float: right;
+    border: solid #866ab3;
+    border-width: 1px 1px;
+    border-radius: 4px;
+    height: 45px;
+    margin-top: -2px;
+    margin-right: -3px;
+    text-align: left;
+}
+.userbox-text {
+    float: left;
+    min-width: 100px;
+    margin-left: 3px;
+    margin-right: 2px;
+    text-align: right;
+}
+.userbox-text a {
+    color: #aaaaff;
+    /*text-decoration: underline;*/
+}
+.userbox-avatar {
+    float: right;
+    margin-top:-4px;
+    margin-right: 7px;
+    margin-left: 6px;
+    width: 52px;
+    height: 52px;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    height: 59px;
+    z-index: 999;
+}
+
+.footer {
+    position: fixed;     width: 100%;     bottom: 0;     text-align: center;     padding-top: 5px; }  .footer-content {     width: 100%;     margin: 0 auto;
+}
+
+#loginMasthead, #loginFooter {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+}
+
+#loginMasthead {
+    border-bottom: 2px solid;
+    top: 0;
+}
+
+#loginFooter {
+    border-top: 2px solid;
+    bottom: 0;
+}
+
+#loginBox {
+    width: 400px;
+    margin: 0 auto 0 auto;
+    margin-top: 5%;
+}
+
+.loginBoxTopBit {
+    padding: 19px;
+    padding-bottom: 0px;
+}
+.loginBoxTopBit h2 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 0px;
+}
+.loginBoxTopBit h3 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 0px;
+}
+.loginBoxWell {
+    padding-bottom: 4px;
+}
+.loginBoxFooter {
+    margin-top: 10px;
+    text-align: center;
+    color: #888899;
+}
+.loginBoxButton {
+    width: 102px;
+    font-size: 16px;
+}
+.loginBoxCheckbox {
+    padding-left: 3px;
+}
+.errorlist {
+    list-style-type: none;
+    padding: 0;
+    text-align: justify;
+    text-justify: auto;
+}
+
+#loginBox h1, #loginBox h2 {
+}
+
+#loginBox .remember {
+    display: block;
+}
+
+#loginBox .remember input {
+    margin-right: 1em;
+}
+
+#loginBox input {
+    margin: 0.4em 0 0.4em 0;
+}
+
+#loginBox input[type=text], #loginBox input[type=password] {
+    display: block;
+    width: 100%;
+}
+
+#loginBox input[type=submit] {
+    float: left;
+}
+
+#loginExtras {
+    float: right;
+    text-align: right;
+}
+
+#loginExtras a {
+    display: block;
+}
+
+.project-info-row {
+    width: 33%;
+    float: left;    
+    box-sizing: border-box;
+}
+
+.borderrightcolumn {
+    border-right: 1px solid black;
+}
+
+.show-grid [class^=col-] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #eee;
+    background-color: rgba(86,61,124,.15);
+    border: 1px solid #ddd;
+    border: 1px solid rgba(86,61,124,.2);
+}
+
+.project-info-title-label {
+    font-weight: bold;
+    text-align: right;
+    padding-top: 12px;
+    padding-bottom: 9px;
+}
+.project-info-title {
+    font-size: 32px;
+    padding-bottom: 9px;
+}
+
+.project-info-detail-label {
+    font-weight: bold;
+    text-align: right;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    min-width: 50px!important;
+}
+
+.project-info-detail {
+    font-size: 16px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.project-info-storage-progress {
+    height: 25px;
+}
+
+.project-info-storage {
+    height: 0;
+    overflow: visible;
+    padding-left: 9px;
+    padding-top: 2px;
+    text-align: left;
+    color: #eeeeee;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+
+}
+
+.dashboard-icon {
+    padding-left: 8px;
+    padding-right: 8px;
+    top: 2px;
+}

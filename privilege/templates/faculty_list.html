@@ -1,0 +1,13 @@
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Faculty List</span>
+{% endblock %}
+
+{% block 'body' %}
+  {% for faculty in faculties %}
+    {% include "cards/faculty.html" with cardType="listEntry" %}
+  {% endfor %}
+{% endblock %}
+

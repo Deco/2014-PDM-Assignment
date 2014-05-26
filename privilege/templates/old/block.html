@@ -1,0 +1,14 @@
+<div id="{{ blockid }}" class="block">
+  <span class="blockTitle">
+    {{ title }}
+  </span>
+  {% for i in items %}
+    <div class="blockItem">
+      <span class="blockItemTitle">
+        {{i.title}}
+      </span>
+      <br>
+      {{i.details}}
+    </div>
+  {% endfor %}
+</div>

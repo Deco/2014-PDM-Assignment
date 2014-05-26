@@ -1,0 +1,32 @@
+
+{% if cardType == "listEntry" %}
+  <div class="listEntry list-group-item">
+    <span class="listEntryTitle">
+      <a href="/user/{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</a>
+    </span>
+  </div>
+{% endif %}
+
+{% if cardType == "project_member_list" %}
+  <div class="listEntry list-group-item">
+    <span class="listEntryTitle">
+      <p>
+          <a href="/user/{{ user.id }}">{{ member.user.first_name }} {{ member.user.last_name }}</a>
+          <span>- {{ member.role }}</span>
+      </p>
+    </span>
+  </div>
+{% endif %}
+
+{% if cardType == "label" %}
+  <a href="/project/{{ project.id }}">{{ project }}</a>
+{% endif %}
+
+{% if cardType == "full" %}
+  <div class="stuff">
+    <span class="stuff">stuff</span>
+      Put stuff for the full project page here.
+  </div>
+{% endif %}
+
+

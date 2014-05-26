@@ -1,0 +1,13 @@
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Project List</span>
+{% endblock %}
+
+{% block 'body' %}
+  {% for project in projects %}
+    {% include "cards/project.html" with cardType="listEntry" %}
+  {% endfor %}
+{% endblock %}
+

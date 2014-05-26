@@ -1,0 +1,85 @@
+
+{% if cardType == "list_entry_brief" %}
+  <div class="list-group-item listEntry">
+    <div class="listEntryTitle">
+      <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
+    </div>
+    <span class="listEntryDetail">
+      {{ faculty.user_role }}
+    </span>
+  </div>
+{% endif %}
+
+{% if cardType == "detailedListEntry" %}
+  <div class="list-group-item listEntry">
+    <div class="col-md-12 listEntryTitle">
+      <a href="/faculty/{{ faculty.id }}/edit">{{ faculty.name }}</a>
+    </div>
+    <div class="col-md-4 listEntryDetailLabel">Space Used:
+      <span class="listEntryDetail">
+        {{ faculty.storageUsedMB }}
+      </span>
+    </div>
+    <div class="col-md-4 listEntryDetailLabel">Space Claimed:
+      <span class="listEntryDetail">
+        {{ faculty.storageCapacityMB }}
+      </span>
+    </div>
+    <div class="col-md-4 listEntryDetailLabel">Update Date:
+      <span class="listEntryDetail">
+        {{ faculty.updateDate }}
+      </span>
+    </div>
+    <br/>
+    <div class="col-md-8 listEntryDetailLabel">My Role:
+      <span class="listEntryDetail">
+        ROLE
+      </span>
+    </div>
+    <div class="col-md-4 listEntryDetailLabel">Member Count:
+      <span class="listEntryDetail">
+        9001
+      </span>
+    </div>
+  </div>
+{% endif %}
+
+{% if cardType == "label" %}
+  <a href="/faculty/{{ faculty.id }}">{{ faculty }}</a>
+{% endif %}
+
+{% if cardType == "full" %}
+  <div class="stuff">
+    <span class="stuff">stuff</span>
+    {% comment %}
+        Put stuff for the full faculty page here.
+    {% endcomment %}
+  </div>
+{% endif %}
+
+{% comment %}
+
+  
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Storage', 'MB'],
+        ['Used {{ project.storageUsedMB }}', {{ project.storageUsedMB }}],
+        ['Capacity {{ project.storageCapacityMB }}', {{ project.storageCapacityMB }}],
+      ]);
+
+      var options = {
+        legend: 'none',
+        pieSliceText: 'label',
+        pieStartAngle: 0,
+      };
+    
+      var chart = new google.visualization.PieChart(document.getElementById('project-storage-chart'));
+      chart.draw(data, options);
+    }
+  </script>
+{% endcomment %}
+

@@ -1,40 +1,48 @@
-{% load staticfiles %}
 <html>
-  <head>
-    <link rel="shortcut icon" href="{% static "favicon.ico" %}" type="image/x-icon">
-    <link rel="icon" href="{% static "favicon.ico" %}" type="image/x-icon">
-    <link href="{% static "css/default.css" %}" rel="stylesheet" type="text/css">
-  </head>
+{% load staticfiles %}
 
-  <body>
-    <div id="loginMasthead">
-      <span>Curtin University of Technology</span>
-    </div>
+<head>
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/docs.min.css' %}">
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/font-awesome.min.css' %}">
+  <link rel="stylesheet" type="text/css" media="screen" href="{% static 'css/common.css' %}">
+  <script src="{% static 'js/jquery-2.1.1.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script><head>
+</head>
 
+<body>
+  <div class="container-fluid content-row">
     <div id="loginBox">
-      <h2>Blackbox</h2>
-      <h3>Research Data Storage</h3>
-      <form action="{% url 'login' %}" method="post">
+      <div class="loginBoxTopBit">
+        <h2>Blackbox</h2>
+        <h3>Research Data Storage</h3>
+      </div>
+      <form class="well loginBoxWell" action="{% url 'login' %}" method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
+        {%if form.non_field_errors %}
+          <div class="loginBoxErrors alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
         <fieldset>
           <legend>Login</legend>
           {{ form.username.errors }}
           {{ form.password.errors }}
           <input class="form-control" type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" placeholder="{{ form.username.label }}" required>
           <input class="form-control" type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="{{ form.password.label }}" required>
-          <span class="remember"><input type="checkbox" name="rememberLogin">Remember for one week</span>
-          <input class="button" type="submit" value="Login">
+          <span class="remember loginBoxCheckbox"><input type="checkbox" name="rememberLogin">Remember for one week</span>
+          <div class="btn-group">
+            <input class="btn btn-default loginBoxButton" type="submit" value="Login">
+          </div>
           <div id="loginExtras">
-            <a href="#">Create account</a>
-            <a href="#">Request assistance</a>
+            <a href="/account/help">Request assistance</a>
+            <a href="/account/create">Create account</a>
           </div>
         </fieldset>
+        <div class="loginBoxFooter">Curtin University of Technology</span>
       </form>
     </div>
+  </div>
+</body>
 
-    <div id="loginFooter">
-      <span>Copyright 2014 &mdash; Team Privileged</span>
-    </div>
-  </body>
 </html>

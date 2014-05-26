@@ -1,0 +1,39 @@
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Project {{ project.id }}</span>
+{% endblock %}
+
+{% block 'body' %}
+  <div class="col-md-12">
+    <div class="dashboard-div">
+      <div class="well list-well">
+        {% include "cards/project.html" with cardType="full" %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="dashboard-div">
+      <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
+      <div class="well list-well">
+        <div id="faculty-box" class="listBox">
+          {% for user in project_members %}
+            {% include "cards/user.html" with cardType="project_member_list" %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="dashboard-div">
+      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Project History</h2>
+      <div class="well list-well">
+        <div id="faculty-box" class="listBox">
+          stuff
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

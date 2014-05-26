@@ -1,0 +1,11 @@
+{% extends "template.html" %}
+{% load static %}
+{% load 1989 %}
+{% block path %}
+Dashboard
+{% endblock %}
+{% block content %}
+{% partial "block.html" "New Notifications" as title and "dashboardNotifications" as blockid and notifications as items %}
+{% partial "block.html" "My Recent Projects" as title and "dashboardProjects" as blockid and projects as items%}
+{% partial "dashboardFacultyBlock.html" "My Faculties" as title and "dashboardFaculties" as blockid and faculties as items %}
+{% endblock %}

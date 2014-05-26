@@ -1,11 +1,48 @@
-{% extends "template.html" %}
-{% load static %}
-{% load 1989 %}
-{% block path %}
-Dashboard
+{% extends "common.html" %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Dashboard</span>
 {% endblock %}
-{% block content %}
-{% partial "block.html" "New Notifications" as title and "dashboardNotifications" as blockid and notifications as items %}
-{% partial "block.html" "My Recent Projects" as title and "dashboardProjects" as blockid and projects as items%}
-{% partial "dashboardFacultyBlock.html" "My Faculties" as title and "dashboardFaculties" as blockid and faculties as items %}
+
+{% block 'body' %}
+  <div class="col-md-5 content-col dashboard-left-column">
+    <div class="dashboard-div">
+      <h1>Notifications</h1>
+      <div class="well list-well">
+        <div id="notification-box" class="listBox">
+          <!--<div class="listEntry list-group-item">
+            <span class="listEntryTitle">Request approved: increase project space</span>
+            <br/>
+            <span class="notification-info">Project: Explosives in space</span>
+          </div>-->
+          <div class="notification-absence-text">
+            You have no unread notifications.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-div">
+      <h1>My Faculties</h1>
+      <div class="well list-well">
+        <div id="faculty-box" class="listBox">
+          {% for faculty in faculties %}
+            {% include "cards/faculty.html" with cardType="list_entry_brief" %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7 content-col">
+    <div class="dashboard-div">
+      <h1>My Projects</h1>
+      <div class="well list-well">
+        <div id="project-box" class="listBox">
+          {% for project in projects %}
+            {% include "cards/project.html" with cardType="list_entry_brief" %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
