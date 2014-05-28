@@ -152,39 +152,76 @@ def view_project_list(request):
 
 @login_required(login_url='/login')
 def view_project_info(request, id=None):
+    form_method = (request.method == "POST" and request.POST or None)
     template = 'project_info.html'
     context = {}
+    #objects_tosave_list = []
+    post_is_valid = False
     
     try:
         project = Project.objects.get(id=id)
     except Project.DoesNotExist:
         return view_error(request, "Project with ID {} does not exist.".format(id))
     
-    form_method = (request.method == "POST" and request.POST or request.GET)
+    membership_qs = ProjectMembership.objects.filter(project=project).order_by("member__last_name")
+    
     form = ProjectForm(form_method, instance=project)
     context['form'] = form
     
-    if request.method == "POST" and form.is_valid():
-        project = form.save(commit=False)
-        project.save()
+    ProjectMembershipFormSet = modelformset_factory(ProjectMembership, form=ProjectMembershipForm, extra=5)
+    membership_formset = ProjectMembershipFormSet(form_method, queryset=membership_qs)
+    context['membership_formset'] = membership_formset
+    
+    if request.method == "POST":
+        if form.is_valid() and membership_formset.is_valid():
+            project = form.save(commit=False)
+            project.save()
+            #objects_tosave_list.append(project)
+            post_is_valid = True
+        else:
+            context['project_form_bad'] = True
+            context['edit_mode'] = True
     
     context['project_members'] = []
-    for project_member in project.members.all().order_by("last_name"):
-        membership = project.get_membership(project_member)
+    membership_form_i = 0
+    for membership_form in membership_formset.forms:
+        membership = membership_form.instance
+        member = (membership_form_i < membership_qs.count() and membership.member or None)
         
-        membership_form = ProjectMembershipForm(form_method, instance=membership)
-        if request.method == "POST" and form.is_valid() and membership_form.is_valid():
+        if post_is_valid:
             membership = membership_form.save(commit=False)
             membership.project = project
-            membership.save()
+            #objects_tosave_list.append(membership)
+        else:
+            post_is_valid = False
         
-        context['project_members'].append({
-            'user': project_member,
-            'role': membership and membership.get_role_nice() or "—",
-            'membership_form': membership_form,
-        })    
+        if member: 
+            member_entry = {
+                'id': member.id,
+                'first_name': member.first_name,
+                'last_name': member.last_name,
+                'role':membership.get_role_nice(),
+            }
+        else:
+            member_entry = {
+                'is_addition': True,
+            }
+        
+        member_entry['membership_form'] = membership_form
+        context['project_members'].append(member_entry)
+        membership_form_i += 1
     
+    if request.method == "POST" and post_is_valid:
+        #for object in objects_tosave_list:
+        #    object.save()
+        context['project_form_commited'] = True
+    
+    context['project_id'] = project.id
     context['project_title'] = project.title
+    context['project_faculty_id'] = project.faculty.id
+    context['project_faculty_name'] = project.faculty.name
+    context['project_creation_time'] = project.creation_time
+    context['project_update_time'] = project.update_time
     
     membership_qs = ProjectMembership.objects.filter(project=project).order_by('last_name')
     
