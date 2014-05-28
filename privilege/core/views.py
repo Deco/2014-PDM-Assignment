@@ -160,27 +160,48 @@ def view_project_info(request, id=None):
     except Project.DoesNotExist:
         return view_error(request, "Project with ID {} does not exist.".format(id))
     
-    context['project'] = project
+    form_method = (request.method == "POST" and request.POST or request.GET)
+    form = ProjectForm(form_method, instance=project)
+    context['form'] = form
+    
+    if request.method == "POST" and form.is_valid():
+        project = form.save(commit=False)
+        project.save()
+    
     context['project_members'] = []
     for project_member in project.members.all().order_by("last_name"):
         membership = project.get_membership(project_member)
+        
+        membership_form = ProjectMembershipForm(form_method, instance=membership)
+        if request.method == "POST" and form.is_valid() and membership_form.is_valid():
+            membership = membership_form.save(commit=False)
+            membership.project = project
+            membership.save()
+        
         context['project_members'].append({
             'user': project_member,
-            'role': membership and membership.get_role_nice() or "—"
-        })
+            'role': membership and membership.get_role_nice() or "—",
+            'membership_form': membership_form,
+        })    
     
-    if project.storage_capacity_mb > 0:
-        context['project_storage_used_percent'] = int(100*project.storage_used_mb/project.storage_capacity_mb)
-        context['project_storage_free_percent'] = 100-int(100*project.storage_used_mb/project.storage_capacity_mb)
-    else:
-        context['project_storage_used_percent'] = 0
-        context['project_storage_free_percent'] = 100
+    context['project_title'] = project.title
+    
+    membership_qs = ProjectMembership.objects.filter(project=project).order_by('last_name')
     
     try:
         membership = ProjectMembership.objects.get(project=project, member=request.user)
         context['project_user_role'] = dict(ProjectMembership.PROJECT_ROLES).get(membership.role, 'unknown')
     except ProjectMembership.DoesNotExist:
         context['project_user_role'] = "—"
+    
+    context['project_storage_used_mb'] = project.storage_used_mb
+    context['project_storage_capacity_mb'] = project.storage_capacity_mb
+    if project.storage_capacity_mb > 0:
+        context['project_storage_used_percent'] = int(100*project.storage_used_mb/project.storage_capacity_mb)
+        context['project_storage_free_percent'] = 100-int(100*project.storage_used_mb/project.storage_capacity_mb)
+    else:
+        context['project_storage_used_percent'] = 0
+        context['project_storage_free_percent'] = 100
     
     return render(request, template, context)
 

@@ -1,11 +1,13 @@
-from django.forms import ModelForm
-from django.forms import fields
+from django.forms import ModelForm, fields, Textarea
 from core.models import *
 
 class ProjectForm(ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'faculty']
+        widgets = {
+            'title': Textarea(),
+        }
         
 class ProjectMembershipForm(ModelForm):
     class Meta:

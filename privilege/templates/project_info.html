@@ -6,43 +6,139 @@
 {% endblock %}
 
 {% block 'body' %}
-  <div class="col-md-12">
-    <div class="dashboard-div">
-      <div class="well list-well">
-        {% include "cards/project.html" with cardType="full" %}
-      </div>
-    </div>
-  </div>
-  <div class="col-md-5">
-    <div class="dashboard-div">
-      <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
-      <div class="well list-well">
-        <div id="faculty-box" class="listBox">
-          {% for member_info in project_members %}
-            <div class="listEntry list-group-item">
-              <span class="listEntryTitle">
-                <div>
-                  <a href="/user/{{ member_info.user.id }}">{{ member_info.user.first_name }} {{ member_info.user.last_name }}</a>
-                </div>
-                <div>
-                  {{ member_info.role }}
-                </div>
-              </span>
+  <form id="project-form" action="" method="post">{% csrf_token %}
+    <div class="col-md-12">
+      <div class="dashboard-div">
+        <div class="well list-well">
+          <div class="row">
+            <div class="col-xs-2 project-info-title-label">
+              Project Title:
             </div>
-          {% endfor %}
+            <div class="col-md-9 project-info-title">
+              <div class="project-info-only">
+                {{ project_title }}
+              </div>
+              <div class="project-edit-only project-edit-title">
+                {{ form.title }}
+              </div>
+            </div>
+            <div class="col-md-1 project-info-title"></div>
+          </div>
+          <div class="row">
+            <div class="col-xs-2 project-info-detail-label">
+              Faculty:
+            </div>
+            <div class="col-md-5 project-info-detail">
+              {% include "cards/faculty.html" with faculty=project.faculty cardType="label" %}
+            </div>
+            <div class="col-xs-2 project-info-detail-label">
+              Creation Date:
+            </div>
+            <div class="col-md-3 project-info-detail">
+              {{ project_creation_date }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-2 project-info-detail-label">
+              My Role:
+            </div>
+            <div class="col-md-5 project-info-detail">
+              {{ project_user_role }}
+            </div>
+            <div class="col-xs-2 project-info-detail-label">
+              Update Date:
+            </div>
+            <div class="col-md-3 project-info-detail">
+              {{ project_update_date }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-2 project-info-detail-label">
+              Storage Space:
+            </div>
+            <div class="col-md-6 project-info-detail">
+              <div class="progress progress-striped active project-info-storage-progress">
+                <div class="project-info-storage">
+                  {{ project_storage_used_mb }}MB of {{ project_storage_capacity_mb }}MB ({{ project_storage_used_percent }}%)
+                </div>
+                <div class="progress-bar progress-bar project-info-storage-bar" style="width: {{ project_storage_used_percent }}%"> 
+                </div>
+                <div class="progress-bar progress-bar-info project-info-storage-bar" style="width: {{ project_storage_free_percent }}%"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="btn-group">
+                {% if project_user_role == "Data Manager" %}
+                  <button class="btn btn-default">Request Additional Space</button>
+                {% endif %}
+                <button id="edit-button" class="btn btn-default project-info-only" onClick="return false;">Edit Project</button>
+                <button id="submit-button" class="btn btn-success project-edit-only" onClick="return false;">Submit</button>
+                <button id="cancel-button" class="btn btn-danger project-edit-only" onClick="return false;">Cancel</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-7">
-    <div class="dashboard-div">
-      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Request History</h2>
-      <div class="well list-well">
-        <div id="faculty-box" class="listBox">
-          stuff
+    <div class="col-md-5">
+      <div class="dashboard-div">
+        <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
+        <div class="well list-well">
+          <div id="faculty-box" class="listBox">
+            {% for member_info in project_members %}
+              <div class="listEntry list-group-item">
+                <span class="listEntryTitle">
+                  <div>
+                    <a href="/user/{{ member_info.user.id }}">{{ member_info.user.first_name }} {{ member_info.user.last_name }}</a>
+                  </div>
+                  <div class="project-edit-only">
+                    {{ member_info.membership_form.member.as_hidden }}
+                    {{ member_info.membership_form.role }}
+                  </div>
+                  <div class="project-info-only">
+                    {{ member_info.role }}
+                  </div>
+                </span>
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
-  </div>
+    <div class="col-md-7">
+      <div class="dashboard-div">
+        <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Request History</h2>
+        <div class="well list-well">
+          <div id="faculty-box" class="listBox">
+            stuff
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <script>
+    $(document).ready(function(){
+        $("#edit-button").click(function(){
+            $(".project-info-only").hide();
+            $(".project-edit-only").show();
+        })
+        $("#submit-button").click(function(){
+            $("#project-form").submit();
+        });
+        $("#cancel-button").click(function(){
+            $(".project-info-only").show();
+            $(".project-edit-only").hide();
+        })
+        
+        $('#id_title').autosize({append: ""});
+        $(".project-edit-only").hide();
+        $('#id_title').keypress(function(event) {
+            if(event.which == '13') {
+                return false;
+            }
+            $('#id_title').autosize({append: ""});
+        });
+    });
+  </script>
 {% endblock %}
 

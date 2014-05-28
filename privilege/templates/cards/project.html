@@ -62,65 +62,6 @@
 {% endif %}
 
 {% if cardType == "full" %}
-  <div class="row">
-    <div class="col-xs-2 project-info-title-label">
-      Project Title:
-    </div>
-    <div class="col-md-10 project-info-title">
-      {{ project.title }}
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2 project-info-detail-label">
-      Faculty:
-    </div>
-    <div class="col-md-5 project-info-detail">
-      {% include "cards/faculty.html" with faculty=project.faculty cardType="label" %}
-    </div>
-    <div class="col-xs-2 project-info-detail-label">
-      Creation Date:
-    </div>
-    <div class="col-md-3 project-info-detail">
-      2048
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2 project-info-detail-label">
-      My Role:
-    </div>
-    <div class="col-md-5 project-info-detail">
-      {{ project_user_role }}
-    </div>
-    <div class="col-xs-2 project-info-detail-label">
-      Update Date:
-    </div>
-    <div class="col-md-3 project-info-detail">
-      2048
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-2 project-info-detail-label">
-      Storage Space:
-    </div>
-    <div class="col-md-6 project-info-detail">
-      <div class="progress progress-striped active project-info-storage-progress">
-        <div class="project-info-storage">
-          {{ project.storage_used_mb }}MB of {{ project.storage_capacity_mb }}MB ({{ project_storage_used_percent }}%)
-        </div>
-        <div class="progress-bar progress-bar project-info-storage-bar" style="width: {{ project_storage_used_percent }}%"> 
-        </div>
-        <div class="progress-bar progress-bar-info project-info-storage-bar" style="width: {{ project_storage_free_percent }}%"></div>
-      </div>
-    </div>
-    <div class="col-md-4">
-        <div class="btn-group">
-          {% if project_user_role == "Data Manager" %}
-            <a href="/project/{{ project.id }}/request"><div class="btn btn-default">Request Additional Space</div></a>
-          {% endif %}
-          <a href="/project/{{ project.id }}/edit"><div class="btn btn-default">Edit Project</div></a>
-        </div>
-    </div>
-  </div>
 {% endif %}
 
 
