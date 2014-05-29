@@ -23,8 +23,15 @@ def view_dashboard(request):
     project_membership_qs = ProjectMembership.objects.filter(member=request.user)
     projects_qs = Project.objects.filter(projectmembership__in=project_membership_qs).order_by("update_time")
     
-    context['faculties'] = []
+    faculty_set = set()
+    for project_membership in project_membership_qs:
+        faculty_set.add(project_membership.project.faculty)
+    
     for faculty in faculties_qs:
+        faculty_set.add(faculty)
+    
+    context['faculties'] = []
+    for faculty in faculty_set:
         faculty_membership = faculty.get_membership(request.user)
         faculty_project_membership_qs = ProjectMembership.objects.filter(project__faculty=faculty, member=request.user)
         
@@ -63,7 +70,6 @@ def view_dashboard(request):
         })
     
     return render(request, template, context)
-
 
 @login_required(login_url='/login')
 def view_faculty_list(request):
@@ -136,7 +142,11 @@ def view_faculty_info(request, id=None):
     return render(request, template, context)
 
 @login_required(login_url='/login')
-def view_faculty_form(request, id=None):
+def view_faculty_delete(request, id=None):
+    pass
+
+@login_required(login_url='/login')
+def view_faculty_create_project(request, id=None):
     pass
 
 @login_required(login_url='/login')
@@ -158,10 +168,44 @@ def view_project_info(request, id=None):
     #objects_tosave_list = []
     post_is_valid = False
     
+    project = None
+    faculty = None
+    pd = {
+        'project_membership' :None,
+        'faculty_membership' :None,
+        'can_edit': False,
+        'can_delete': False,
+    }
+    
     try:
         project = Project.objects.get(id=id)
     except Project.DoesNotExist:
         return view_error(request, "Project with ID {} does not exist.".format(id))
+    
+    faculty = project.faculty
+    
+    def fillpermissions():
+        pd['project_membership'] = project.get_membership(request.user)
+        context['project_user_role'] = (
+                pd['project_membership'] and pd['project_membership'].get_role_nice()
+            or  "—"
+        )
+        pd['faculty_membership'] = faculty.get_membership(request.user)
+        
+        pd['can_edit'] = (
+                pd['project_membership'] and (
+                        pd['project_membership'].role == ProjectMembership.PRINCIPALINVESTIGATOR
+                    or  pd['project_membership'].role == ProjectMembership.DATAMANAGER
+                )
+            or  pd['faculty_membership'] and (
+                    pd['faculty_membership'].role == FacultyMembership.MANAGER
+                )
+        )
+        pd['can_delete'] = pd['faculty_membership'] and (pd['faculty_membership'].role == FacultyMembership.MANAGER)
+        context['can_edit'] = pd['can_edit']
+        context['can_delete'] = pd['can_delete']
+    
+    fillpermissions()
     
     membership_qs = ProjectMembership.objects.filter(project=project).order_by("member__last_name")
     
@@ -172,12 +216,23 @@ def view_project_info(request, id=None):
     membership_formset = ProjectMembershipFormSet(form_method, queryset=membership_qs)
     context['membership_formset'] = membership_formset
     
+    for membership_form in membership_formset:
+        membership_form.fields['role'].required = False
+    
     if request.method == "POST":
+        if not pd['can_edit']:
+            return view_error(request, "You do not have permission to edit this project.")
+        
         if form.is_valid() and membership_formset.is_valid():
             project = form.save(commit=False)
             project.save()
+            if faculty != project.faculty:
+                pass; pass; pass # todo: check permissions in other faculty (can we move to it?)
+            
+            faculty = project.faculty
             #objects_tosave_list.append(project)
             post_is_valid = True
+            fillpermissions()
         else:
             context['project_form_bad'] = True
             context['edit_mode'] = True
@@ -189,9 +244,18 @@ def view_project_info(request, id=None):
         member = (membership_form_i < membership_qs.count() and membership.member or None)
         
         if post_is_valid:
-            membership = membership_form.save(commit=False)
-            membership.project = project
-            #objects_tosave_list.append(membership)
+            if membership_form.has_changed():
+                if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
+                    print("BEFORE: ", membership_qs.count())
+                    membership_form.instance.delete()
+                    print("AFTER: ", membership_qs.count())
+                    membership_form_i += 1
+                    continue
+                
+                membership = membership_form.save(commit=False)
+                membership.project = project
+                membership.save()
+                #objects_tosave_list.append(membership)
         else:
             post_is_valid = False
         
@@ -223,14 +287,6 @@ def view_project_info(request, id=None):
     context['project_creation_time'] = project.creation_time
     context['project_update_time'] = project.update_time
     
-    membership_qs = ProjectMembership.objects.filter(project=project).order_by('last_name')
-    
-    try:
-        membership = ProjectMembership.objects.get(project=project, member=request.user)
-        context['project_user_role'] = dict(ProjectMembership.PROJECT_ROLES).get(membership.role, 'unknown')
-    except ProjectMembership.DoesNotExist:
-        context['project_user_role'] = "—"
-    
     context['project_storage_used_mb'] = project.storage_used_mb
     context['project_storage_capacity_mb'] = project.storage_capacity_mb
     if project.storage_capacity_mb > 0:
@@ -243,51 +299,38 @@ def view_project_info(request, id=None):
     return render(request, template, context)
 
 @login_required(login_url='/login')
-def view_project_form(request, id=None):
-    template = "project_form.html"
-    
-    if id:
-        proj = Project.objects.get(pk=id)
-        is_new = False
-    else:
-        proj = None
-        is_new = True
-    
-    
-    if request.method == "GET":
-        form = ProjectForm(instance=proj)
-        formset = modelformset_factory(ProjectMembership, form=ProjectMembershipForm, extra=5)
-        
-        projMembership = ProjectMembership.objects.filter(project=proj).order_by('id')
-        formset = formset(queryset=projMembership)
-        
-        return render(request, template, {'form': form, 'formset': formset, 'is_new': is_new})
-        
-    if request.method == "POST":
-        form = ProjectForm(request.POST, instance=proj)
-        formset = modelformset_factory(ProjectMembership, form=ProjectMembershipForm, extra=5)
-        projMembership = ProjectMembership.objects.filter(project=proj).order_by('id')
-        formset = formset(request.POST, queryset=projMembership)
-        
-        if form.is_valid() and formset.is_valid():
-            project = form.save(commit=False)
-            project.save()
-            
-            for form in formset.forms:
-                if form.has_changed():
-                    projMembership = form.save(commit=False)
-                    projMembership.project = project
-                    projMembership.save()
-            
-            return redirect('/project/{}'.format(project.id))
-            
-        else:
-            return render(request, template, {'form': form, 'formset': formset, 'is_new': is_new})
+def view_project_delete(request, id=None):
+    pass
 
 @login_required(login_url='/login')
-
-def view_user_info(request, id=None):
-    pass
+def view_project_create_request(request, id=None):
+    #objects_tosave_list = []
+    post_is_valid = False
+    
+    try:
+        project = Project.objects.get(id=id)
+    except Project.DoesNotExist:
+        return view_error(request, "Project with ID {} does not exist.".format(id))
+    
+    try:
+        membership = ProjectMembership.objects.get(project=project, member=request.user, role=ProjectMembership.DATAMANAGER)
+    except ProjectMembership.DoesNotExist:
+        return view_error(request, "You must be a 'Data Manager' for this project to create a request (project_id: {})".format(id))
+    
+    spacerequest = SpaceRequest()
+    spacerequest.project      = project
+    spacerequest.size_mb      = 512
+    spacerequest.comment      = None
+    spacerequest.status       = SpaceRequest.STATUS_INACTIVE
+    spacerequest.request_time = None
+    spacerequest.requested_by = request.user
+    spacerequest.action_time  = None
+    spacerequest.actioned_by  = None
+    spacerequest.save()
+    
+    print(spacerequest.id)
+    
+    return redirect('/request/{}'.format(spacerequest.id))
 
 @login_required(login_url='/login')
 def view_request_list(request, id=None):
@@ -295,50 +338,197 @@ def view_request_list(request, id=None):
 
 @login_required(login_url='/login')
 def view_request_info(request, id=None):
+    form_method = (request.method == "POST" and request.POST or None)
+    template = 'request_info.html'
+    context = {}
+    
+    try:
+        spacerequest = SpaceRequest.objects.get(id=id)
+    except SpaceRequest.DoesNotExist:
+        return view_error(request, "Space request with ID {} does not exist.".format(id))
+    
+    project = spacerequest.project
+    
+    try:
+        project_membership = ProjectMembership.objects.get(
+            project=project, member=request.user
+        )
+    except ProjectMembership.DoesNotExist:
+        project_membership = None
+    
+    try:
+        faculty_membership = FacultyMembership.objects.get(
+            faculty=project.faculty, member=request.user
+        )
+    except FacultyMembership.DoesNotExist:
+        faculty_membership = None
+    
+    can_edit = (
+            spacerequest.status == SpaceRequest.STATUS_INACTIVE
+        and project_membership and (
+                    project_membership.role == ProjectMembership.PRINCIPALINVESTIGATOR
+                or  project_membership.role == ProjectMembership.DATAMANAGER
+            )
+    )
+    can_activate = can_edit
+    can_action = (
+            spacerequest.status == SpaceRequest.STATUS_PENDING
+        and faculty_membership and (
+                    faculty_membership.role == FacultyMembership.MANAGER
+                or  faculty_membership.role == FacultyMembership.APPROVER
+            )
+    )
+    
+    context['can_edit'] = can_edit
+    context['can_activate'] = can_activate
+    context['can_action'] = can_action
+    context['can_delete'] = faculty_membership and (faculty_membership.role == FacultyMembership.MANAGER)
+    
+    form = SpaceRequestForm(form_method, instance=spacerequest)
+    context['form'] = form
+    
+    if request.method == "POST":
+        if form.is_valid():
+            spacerequest = form.save(commit=False)
+            if project != spacerequest.project:
+                return view_error(request, "project change ??!?!?")
+            
+            spacerequest.save()
+            context['spacerequest_form_commited'] = True
+        else:
+            context['spacerequest_form_bad'] = True
+            context['edit_mode'] = True
+    
+    context['spacerequest_id'] = spacerequest.id
+    context['spacerequest_size_mb'] = spacerequest.size_mb
+    context['spacerequest_status'] = spacerequest.get_status_nice()
+    context['spacerequest_request_time'] = spacerequest.request_time
+    context['spacerequest_requested_by'] = spacerequest.requested_by
+    context['spacerequest_action_time'] = spacerequest.action_time
+    context['spacerequest_actioned_by'] = spacerequest.actioned_by
+    
+    context['project_id'] = project.id
+    context['project_title'] = project.title
+    context['project_faculty_id'] = project.faculty.id
+    context['project_faculty_name'] = project.faculty.name
+    
+    if project_membership:
+        context['project_user_role'] = project_membership.get_role_nice()
+    else:
+        context['project_user_role'] = "—"
+    
+    context['project_storage_used_mb'] = project.storage_used_mb
+    context['project_storage_capacity_mb'] = project.storage_capacity_mb
+    
+    return render(request, template, context)
+
+@login_required(login_url='/login')
+def view_request_activate(request, id=None):
+    try:
+        spacerequest = SpaceRequest.objects.get(id=id)
+    except SpaceRequest.DoesNotExist:
+        return view_error(request, "Space request with ID {} does not exist.".format(id))
+    
+    try:
+        project_membership = ProjectMembership.objects.get(
+            project=spacerequest.project, member=request.user
+        )
+    except ProjectMembership.DoesNotExist:
+        project_membership = None
+    
+    has_access = project_membership and (
+            project_membership.role == ProjectMembership.PRINCIPALINVESTIGATOR
+        or  project_membership.role == ProjectMembership.DATAMANAGER
+    )
+    if not has_access:
+        return view_error(request, "You must be a 'Principal Investigator' or 'Data Manager' to activate a space request.")
+    
+    if not spacerequest.status == SpaceRequest.STATUS_INACTIVE:
+        return view_error(request, "A request must be 'Inactive' to be activated.")
+    
+    spacerequest.request_time = datetime.datetime.now()
+    spacerequest.requested_by = request.user
+    spacerequest.status = SpaceRequest.STATUS_PENDING
+    spacerequest.save()
+    
+    return redirect('/request/{}'.format(id))
+
+@login_required(login_url='/login')
+def view_request_approve(request, id=None):
+    try:
+        spacerequest = SpaceRequest.objects.get(id=id)
+    except SpaceRequest.DoesNotExist:
+        return view_error(request, "Space request with ID {} does not exist.".format(id))
+    
+    try:
+        faculty_membership = FacultyMembership.objects.get(
+            faculty=spacerequest.project.faculty, member=request.user,
+        )
+    except FacultyMembership.DoesNotExist:
+        faculty_membership = None
+    
+    has_access = faculty_membership and (
+            faculty_membership.role == FacultyMembership.MANAGER
+        or  faculty_membership.role == FacultyMembership.APPROVER
+    )
+    
+    if not has_access:
+        return view_error(request, "You must be a 'Manager' or an 'Approver' for this faculty to approve a request (request_id: {})".format(id))
+    
+    if not spacerequest.status == SpaceRequest.STATUS_PENDING:
+        return view_error(request, "A request must be 'Pending' to be approved.")
+    
+    project = spacerequest.project
+    project.storage_capacity_mb = project.storage_capacity_mb+spacerequest.size_mb
+    project.update_time = datetime.datetime.now()
+    project.save()
+    
+    spacerequest.action_time = datetime.datetime.now()
+    spacerequest.actioned_by = request.user
+    spacerequest.status = SpaceRequest.STATUS_APPROVED
+    spacerequest.save()
+    
+    return redirect('/request/{}'.format(id))
+
+@login_required(login_url='/login')
+def view_request_reject(request, id=None):
+    try:
+        spacerequest = SpaceRequest.objects.get(id=id)
+    except SpaceRequest.DoesNotExist:
+        return view_error(request, "Space request with ID {} does not exist.".format(id))
+    
+    try:
+        faculty_membership = FacultyMembership.objects.get(
+            faculty=spacerequest.project.faculty, member=request.user,
+        )
+    except FacultyMembership.DoesNotExist:
+        faculty_membership = None
+    
+    has_access = faculty_membership and (
+            faculty_membership.role == FacultyMembership.MANAGER
+        or  faculty_membership.role == FacultyMembership.APPROVER
+    )
+    
+    if not has_access:
+        return view_error(request, "You must be a 'Manager' or an 'Approver' for this faculty to reject a request (request_id: {})".format(id))
+    
+    if not spacerequest.status == SpaceRequest.STATUS_PENDING:
+        return view_error(request, "A request must be 'Pending' to be rejected.")
+    
+    spacerequest.action_time = datetime.datetime.now()
+    spacerequest.actioned_by = request.user
+    spacerequest.status = SpaceRequest.STATUS_REJECTED
+    spacerequest.save()
+    
+    return redirect('/request/{}'.format(id))
+
+@login_required(login_url='/login')
+def view_request_delete(request, id=None):
     pass
 
 @login_required(login_url='/login')
-def view_request_form(request, id=None, project_id=None):
-    template = "request_form.html"
-    formClass = RequestForm
-    user = request.user
-    instance = None
-    project = None
-    is_new = True
-    
-    if id:
-        instance = SpaceRequest.objects.get(pk=id)
-        is_new = False
-        
-    if project_id:
-        try:
-            project = Project.objects.get(id=project_id)
-        except Project.DoesNotExist:
-            return view_error(request, "Project ID is invalid (project_id: {}).".format(project_id))
-        
-        try:
-            membership = ProjectMembership.objects.get(project=project, member=user, role=ProjectMembership.DATAMANAGER)
-        except ProjectMembership.DoesNotExist:
-            return view_error(request, "You must be a 'Data Manager' for this project to create a request (project_id: {})".format(project_id))
-    
-    if request.method == "GET":
-        form = formClass(user, instance=instance, initial={'project':project.id})
-        return render(request, template, {'form': form, 'is_new': is_new})
-        
-    if request.method == "POST":
-        from django.contrib import auth
-        form = formClass(user, instance=instance)
-        
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.requested_by = request.user
-            instance.date_requested = datetime.datetime.now()
-            instance.save()
-            
-            return redirect('/project/{}'.format(project.id))
-            
-        else:
-            return render(request, template, {'form': form, 'is_new': is_new})
+def view_user_info(request, id=None):
+    pass
 
 @login_required(login_url='/login')
 def view_history(request, id=None):

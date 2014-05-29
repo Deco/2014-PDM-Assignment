@@ -7,17 +7,17 @@ from django.contrib.auth.views import login, logout
 
 urlpatterns = patterns(
     '',
-
+    
     url('^login/$',
         login,
         {'template_name': 'login.html'},
         name='login'
-        ),
-
+    ),
+    
     url('^logout/$',
         logout,
         {'next_page': '/'},
         name='logout'
-        ),
-
+    ),
+    
 )

@@ -1,24 +1,4 @@
 
-{% if cardType == "list_entry_brief" %}
-  <div class="list-group-item listEntry">
-    <div class="listEntryTitle">
-      <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
-    </div>
-    <span class="listEntryDetail">
-      {% for role in faculty.role_list %}
-        {% if role.count != 0 %}
-          <span>
-            {{ role.name }}
-            {% if role.count > 0 %}
-              &nbsp;<span>({{ role.count }})</span>
-            {% endif %} 
-          </span>
-        {% endif %}
-      {% endfor %}
-    </span>
-  </div>
-{% endif %}
-
 {% if cardType == "detailedListEntry" %}
   <div class="list-group-item listEntry">
     <div class="col-md-12 listEntryTitle">

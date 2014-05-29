@@ -27,7 +27,24 @@
       <div class="well list-well">
         <div id="faculty-box" class="listBox">
           {% for faculty in faculties %}
-            {% include "cards/faculty.html" with cardType="list_entry_brief" %}
+            <div class="list-group-item listEntry">
+              <div class="listEntryTitle">
+                <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
+              </div>
+              <span class="listEntryDetail">
+                {% for role in faculty.role_list %}
+                  {% if role.count != 0 %}
+                    <span>
+                      {% if role.count > 0 %}
+                        {{ role.name }}&nbsp;<span>({{ role.count }});</span>
+                      {% else %}
+                        {{ role.name }};
+                      {% endif %}
+                    </span>
+                  {% endif %}
+                {% endfor %}
+              </span>
+            </div>
           {% endfor %}
         </div>
       </div>

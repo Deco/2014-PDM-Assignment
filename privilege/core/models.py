@@ -110,13 +110,14 @@ class ProjectMembership(models.Model):
     def get_role_nice(self):
         return dict(self.PROJECT_ROLES).get(self.role, 'Unknown')
 
-
 class SpaceRequest(models.Model):
+    STATUS_INACTIVE = 'I'
     STATUS_PENDING = 'P'
     STATUS_APPROVED = 'A'
     STATUS_REJECTED = 'R'
     
     STATUS = (
+        (STATUS_INACTIVE, 'Inactive'),
         (STATUS_PENDING, 'Pending'),
         (STATUS_APPROVED, 'Approved'),
         (STATUS_REJECTED, 'Rejected'),
@@ -133,6 +134,9 @@ class SpaceRequest(models.Model):
     
     def __unicode__(self):
         return str(self.project) + ' ' + str(self.request_time) + ' (' + str(self.size_mb) + ')'
+    
+    def get_status_nice(self):
+        return dict(self.STATUS).get(self.status, 'Unknown')
 
 class HistoryEntry(models.Model):
     KIND = (

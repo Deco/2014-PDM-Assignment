@@ -2,7 +2,7 @@
 
 {% block 'breadcrumb' %}
   <span class="crumb-sep">&gt;</span>
-  <span class="crumb-part">Project {{ project.id }}</span>
+  <span class="crumb-part">Project {{ project_id }}</span>
 {% endblock %}
 
 {% block 'body' %}
@@ -16,46 +16,49 @@
       {% if project_form_bad %}
         <div class="panel panel-danger">
           <div class="panel-heading">There was an error submitting your changes.</div>
-          {% if form.non_field_errors %}
-            {% for error in form.non_field_errors %}
-              <div class="panel-body">
-                <strong>&#x2014;</strong>: {{ error }}
-              </div>
-            {% endfor %}
-          {% endif %}
-          {% for field in form %}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <div class="panel-body">
-                  <strong>{{ field.label }}</strong>: {{ error }}
-                </div>
+          <ul class="list-group">
+           {% if form.non_field_errors %}
+             {% for error in form.non_field_errors %}
+               <li class="list-group-item">
+                 <strong>&#x2014;</strong>: {{ error }}
+               </li>
+             {% endfor %}
+           {% endif %}
+           {% for field in form %}
+             {% if field.errors %}
+               {% for error in field.errors %}
+                 <li class="list-group-item">
+                   <strong>{{ field.label }}</strong>: {{ error }}
+                 </li>
+               {% endfor %}
+             {% endif %}
+           {% endfor %}
+           {% for error in membership_formset.non_field_errors %}
+             <li class="list-group-item">
+               <strong>&#x2014;</strong>: {{ error }}
+             </li>
+           {% endfor %}
+           {% for form in membership_formset %}
+             {% for error in form.non_field_errors %}
+               <li class="list-group-item">
+                 {{ error }}
+               </li>
+             {% endfor %}
+             {% for field in form %}
+               {% if field.errors %}
+                  {% for error in field.errors %}
+                    <li class="list-group-item">
+                      <strong>{{ field.label }}</strong>: {{ error }}
+                    </li>
+                  {% endfor %}
+                {% endif %}
               {% endfor %}
-            {% endif %}
-          {% endfor %}
-          {% for error in membership_formset.non_field_errors %}
-            <div class="panel-body">
-              {{ error }}
-            </div>
-          {% endfor %}
-          {% for form in membership_formset %}
-            {% for error in form.non_field_errors %}
-              <div class="panel-body">
-                {{ error }}
-              </div>
             {% endfor %}
-            {% for field in form %}
-              {% if field.errors %}
-                {% for error in field.errors %}
-                  <div class="panel-body">
-                    <strong>{{ field.label }}</strong>: {{ error }}
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endfor %}
-          {% endfor %}
+          </ul>
         </div>
       {% endif %}
       <div class="dashboard-div">
+        {{ form.id }}
         <div class="well list-well">
           <div class="row">
             <div class="col-xs-2 project-info-title-label">
@@ -87,7 +90,7 @@
               Creation Date:
             </div>
             <div class="col-md-3 project-info-detail">
-              {{ project_creation_date }}
+              {{ project_creation_time }}
             </div>
           </div>
           <div class="row">
@@ -101,7 +104,7 @@
               Update Date:
             </div>
             <div class="col-md-3 project-info-detail">
-              {{ project_update_date }}
+              {{ project_update_time }}
             </div>
           </div>
           <div class="row">
@@ -121,14 +124,18 @@
             <div class="col-md-4">
               <div class="btn-group">
                 {% if project_user_role == "Data Manager" %}
-                  <button class="btn btn-default project-info-only">Request Additional Space</button>
+                  <a class="btn btn-default project-info-only" href="/project/{{ project_id }}/request">Request Additional Space</a>
                 {% endif %}
-                <button id="edit-button" class="btn btn-default project-info-only" onClick="return false;">Edit Project</button>
+                {% if can_edit %}
+                  <button id="edit-button" class="btn btn-default project-info-only" onClick="return false;">Edit Project</button>
+                {% endif %}
                 <button id="submit-button" class="btn btn-success project-edit-only" onClick="return false;">Submit</button>
                 <button id="cancel-button" class="btn btn-warning project-edit-only" onClick="return false;">Cancel</button>
               </div>
               <div class="btn-group">
-                <a href="/project/{{ project_id }}/delete" class="btn btn-danger project-edit-only">Delete</a>
+                {% if can_delete %}
+                  <a href="/project/{{ project_id }}/delete" class="btn btn-danger project-edit-only">Delete</a>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -137,41 +144,70 @@
     </div>
     <div class="col-md-5">
       <div class="dashboard-div">
-        <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
+        <ul class="nav nav-tabs">
+          <li class="info-tab-header active">
+            <a href="#members" data-toggle="tab"><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</a>
+          </li>
+          <li class="info-tab-header">
+            <a href="#requests" data-toggle="tab"><span class="glyphicon glyphicon-tasks dashboard-icon"></span>Requests</a>
+          </li>
+        </ul>
         <div class="well list-well">
-          <div id="faculty-box" class="listBox">
-            {{ membership_formset.management_form }}
-            {% for member_info in project_members %}
-              <div class="listEntry list-group-item">
-                <span class="listEntryTitle">
-                  <div>
-                    <a href="/user/{{ member_info.id }}">{{ member_info.first_name }} {{ member_info.last_name }}</a>
+          <div class="tab-content">
+            <div class="tab-pane active" id="members">
+              <div id="faculty-box" class="listBox">
+                {{ membership_formset.management_form }}
+                {% for member_info in project_members %}
+                  <div class="listEntry list-group-item">
+                    <span class="listEntryTitle">
+                      <div>
+                        <a href="/user/{{ member_info.id }}">{{ member_info.first_name }} {{ member_info.last_name }}</a>
+                      </div>
+                      <div class="project-edit-only">
+                        {{ member_info.membership_form.id }}
+                        {% if member_info.is_addition %}
+                          {{ member_info.membership_form.member }}
+                        {% else %}
+                          {{ member_info.membership_form.member.as_hidden }}
+                        {% endif %}
+                        {{ member_info.membership_form.role }}
+                      </div>
+                      <div class="project-info-only">
+                        {{ member_info.role }}
+                      </div>
+                    </span>
                   </div>
-                  <div class="project-edit-only">
-                    {{ member_info.membership_form.id }}
-                    {% if member_info.is_addition %}
-                      {{ member_info.membership_form.member }}
-                    {% else %}
-                      {{ member_info.membership_form.member.as_hidden }}
-                    {% endif %}
-                    {{ member_info.membership_form.role }}
-                  </div>
-                  <div class="project-info-only">
-                    {{ member_info.role }}
-                  </div>
-                </span>
+                {% endfor %}
               </div>
-            {% endfor %}
+            </div>
+            <div class="tab-pane" id="requests">
+                requests
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="col-md-7">
       <div class="dashboard-div">
-        <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Request History</h2>
+        <ul class="nav nav-tabs">
+          <li class="active info-tab-header">
+            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-th-list dashboard-icon"></span>History</a>
+          </li>
+          <li class="info-tab-header">
+            <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
+          </li>
+        </ul>
         <div class="well list-well">
-          <div id="faculty-box" class="listBox">
-            stuff
+          <div class="tab-content">
+            <div class="tab-pane active" id="history">
+                history
+            </div>
+            <div class="tab-pane" id="requests">
+                requests
+            </div>
+            <div class="tab-pane" id="comments">
+                comments
+            </div>
           </div>
         </div>
       </div>
@@ -203,6 +239,8 @@
             }
             $('#id_title').autosize({append: ""});
         });
+        
+        $(".member-select").searchit({size: 15, dropDownClass: 'member-select-wrap'});
         
         {% if edit_mode %}
           showEdit();

@@ -245,6 +245,13 @@ body {
     display: block;
 }
 
+.info-tab-header {
+    font-size: 24px;
+}
+.info-tab-header a {
+    color: #326baa;
+}
+
 .project-info-row {
     width: 33%;
     float: left;    
@@ -278,8 +285,8 @@ body {
 .project-edit-title textarea {
     width: 100%;
     height: 0;
-	-webkit-transition: height 0.2s;
 	-moz-transition: height 0.2s;
+	-webkit-transition: height 0.2s;
 	transition: height 0.2s;
 }
 
@@ -307,10 +314,35 @@ body {
     padding-left: 9px;
     padding-top: 2px;
     text-align: left;
-    color: #eeeeee;
+    /*color: #eeeeee;*/
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
+}
 
+.spacerequest-header {
+    font-size: 24px;
+}
+.spacerequest-project-title {
+    font-style: italic;
+}
+.spacerequest-project-dropdown {
+    z-index: 999;
+}
+.spacerequest-project-textfield {
+    width: 100%;
+}
+.spacerequest-status-idle {
+    color: #aaaaaa;
+    padding: 4px 6px 4px 6px;
+}
+.spacerequest-status-active {
+    padding: 4px 6px 4px 6px;
+    border: 1px solid #AAAAEE;
+    border-radius: 3px;
+}
+
+.member-select-wrap {
+    z-index: 999;
 }
 
 .dashboard-icon {
