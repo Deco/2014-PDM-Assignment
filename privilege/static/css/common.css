@@ -262,15 +262,6 @@ body {
     border-right: 1px solid black;
 }
 
-.show-grid [class^=col-] {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    background-color: #eee;
-    background-color: rgba(86,61,124,.15);
-    border: 1px solid #ddd;
-    border: 1px solid rgba(86,61,124,.2);
-}
-
 .project-info-title-label {
     font-weight: bold;
     text-align: right;
@@ -319,6 +310,13 @@ body {
     font-size: 16px;
 }
 
+.faculty-storage-chart {
+    width: 100px;
+}
+.faculty-roles-row {
+    margin-bottom: 10px;
+}
+
 .spacerequest-header {
     font-size: 24px;
 }
@@ -348,5 +346,18 @@ body {
 .dashboard-icon {
     padding-left: 8px;
     padding-right: 8px;
-    top: 2px;
+    top: 4px;
+}
+
+.alignright {
+    text-align: right;
+}
+
+.show-grid [class^=col-] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #eee;
+    background-color: rgba(86,61,124,.15);
+    border: 1px solid #ddd;
+    border: 1px solid rgba(86,61,124,.2);
 }

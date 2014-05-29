@@ -56,7 +56,21 @@
       <div class="well list-well">
         <div id="project-box" class="listBox">
           {% for project in projects %}
-            {% include "cards/project.html" with cardType="list_entry_brief" %}
+            <div class="listEntry list-group-item">
+              <div class="row">
+                <div class="listEntryTitle col-md-12">
+                  <a href="/project/{{ project.id }}">{{ project.title }}</a>
+                </div>
+              </div>
+              <div class="row">
+                <div class="listEntryDetail col-md-9 dashboard-project-faculty">
+                  {% include "cards/faculty.html" with faculty=project.faculty cardType="label" %}
+                </div>
+                <div class="listEntryDetail col-md-3 dashboard-project-role">
+                  {{ project.user_role }}
+                </div>
+              </div>
+            </div>
           {% endfor %}
         </div>
       </div>

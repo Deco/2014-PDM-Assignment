@@ -5,6 +5,19 @@ class UserChoiceField(ModelChoiceField):
      def label_from_instance(self, obj):
          return "%s %s" % (obj.first_name, obj.last_name)
 
+class FacultyForm(ModelForm):
+    class Meta:
+        model = Faculty
+        fields = ['name']
+        widgets = {
+            'name': Textarea(),
+        }
+
+class FacultyMembershipForm(ModelForm):
+    class Meta:
+        model = FacultyMembership
+        fields = ['member', 'role']
+
 class ProjectForm(ModelForm):
     class Meta:
         model = Project
@@ -22,13 +35,7 @@ class ProjectMembershipForm(ModelForm):
         model = ProjectMembership
         fields = ['member', 'role']
 
-class FacultyMembershipForm(ModelForm):
-    class Meta:
-        model = FacultyMembership
-        fields = ['member', 'role']
-
 class SpaceRequestForm(ModelForm):
-    
     #def __init__(self, user=None, *args, **kwargs):
     #    super(SpaceRequestForm, self).__init__(*args, **kwargs)
         #membershipObjs = ProjectMembership.objects.filter(member=user)

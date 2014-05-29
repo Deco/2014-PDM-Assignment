@@ -84,60 +84,170 @@ def view_faculty_list(request):
 
 @login_required(login_url='/login')
 def view_faculty_info(request, id=None):
-    template = "faculty_info.html"
+    form_method = (request.method == "POST" and request.POST or None)
+    template = 'faculty_info.html'
     context = {}
+    post_is_valid = False
+    
+    faculty = None
+    pd = {
+        'membership' :None,
+        'can_edit': False,
+        'can_delete': False,
+    }
     
     try:
-        faculty = Faculty.objects.get(pk=id)
+        faculty = Faculty.objects.get(id=id)
     except Faculty.DoesNotExist:
         return view_error(request, "Faculty with ID {} does not exist.".format(id))
     
-    context['faculty_name'] = faculty.name
-    context['faculty_update_time'] = faculty.update_time
-    context['faculty_creation_time'] = faculty.creation_time
-    context['faculty_members'] = []
-    for faculty_member in faculty.members.all().order_by("last_name"):
-        membership = faculty.get_membership(faculty_member)
-        context['faculty_members'].append({
-            'user': faculty_member,
-            'role': membership and membership.get_role_nice() or "—"
-        })
-    context['faculty_storage_used_mb'] = Project.objects.filter(faculty=faculty).aggregate(Sum('storage_used_mb'))['storage_used_mb__sum']
-    context['faculty_storage_claimed_mb'] = Project.objects.filter(faculty=faculty).aggregate(Sum('storage_capacity_mb'))['storage_capacity_mb__sum']
+    def fillpermissions():
+        pd['membership'] = faculty.get_membership(request.user)
+        context['faculty_user_role'] = (
+                pd['membership'] and pd['membership'].get_role_nice()
+            or  "—"
+        )
+        
+        pd['can_edit'] = pd['membership'] and (
+            pd['membership'].role == FacultyMembership.MANAGER
+        )
+        pd['can_delete'] = pd['can_edit']
+        context['can_edit'] = pd['can_edit']
+        context['can_delete'] = pd['can_delete']
     
-    if context['faculty_storage_claimed_mb'] > 0:
-        context['faculty_storage_used_percent'] = int(100*context['faculty_storage_used_mb']/context['faculty_storage_claimed_mb'])
-        context['faculty_storage_free_percent'] = 100-int(100*context['faculty_storage_used_mb']/context['faculty_storage_claimed_mb'])
+    fillpermissions()
+    
+    project_qs = Project.objects.filter(faculty=faculty).order_by("-update_time")
+    spacerequest_qs = SpaceRequest.objects.filter(project__faculty=faculty).order_by("-update_time")
+    membership_qs = FacultyMembership.objects.filter(faculty=faculty).order_by("member__last_name")
+    
+    form = FacultyForm(form_method, instance=faculty)
+    context['form'] = form
+    
+    FacultyMembershipFormSet = modelformset_factory(FacultyMembership, form=FacultyMembershipForm, extra=5)
+    membership_formset = FacultyMembershipFormSet(form_method, queryset=membership_qs)
+    context['membership_formset'] = membership_formset
+    
+    for membership_form in membership_formset:
+        membership_form.fields['role'].required = False
+    
+    if request.method == "POST":
+        if not pd['can_edit']:
+            return view_error(request, "You do not have permission to edit this faculty.")
+        
+        if form.is_valid() and membership_formset.is_valid():
+            faculty = form.save(commit=False)
+            faculty.update_time = datetime.datetime.now()
+            faculty.save()
+            post_is_valid = True
+            fillpermissions()
+        else:
+            context['faculty_form_bad'] = True
+            context['edit_mode'] = True
+    
+    context['faculty_members'] = []
+    membership_form_i = 0
+    for membership_form in membership_formset.forms:
+        membership = membership_form.instance
+        member = (membership_form_i < membership_qs.count() and membership.member or None)
+        
+        if post_is_valid:
+            if membership_form.has_changed():
+                if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
+                    print("BEFORE: ", membership_qs.count())
+                    membership_form.instance.delete()
+                    print("AFTER: ", membership_qs.count())
+                    membership_form_i += 1
+                    continue
+                
+                membership = membership_form.save(commit=False)
+                membership.faculty = faculty
+                membership.save()
+                #objects_tosave_list.append(membership)
+        else:
+            post_is_valid = False
+        
+        if member: 
+            member_entry = {
+                'id': member.id,
+                'first_name': member.first_name,
+                'last_name': member.last_name,
+                'role': membership.get_role_nice(),
+            }
+        else:
+            member_entry = {
+                'is_addition': True,
+            }
+        
+        member_entry['membership_form'] = membership_form
+        context['faculty_members'].append(member_entry)
+        membership_form_i += 1
+    
+    if request.method == "POST" and post_is_valid:
+        context['faculty_form_commited'] = True
+    
+    context['faculty_id'] = faculty.id
+    context['faculty_name'] = faculty.name
+    context['faculty_creation_time'] = faculty.creation_time
+    context['faculty_update_time'] = faculty.update_time
+    
+    context['faculty_storage_used_mb'] = project_qs.aggregate(Sum('storage_used_mb'))['storage_used_mb__sum']
+    context['faculty_storage_capacity_mb'] = project_qs.aggregate(Sum('storage_capacity_mb'))['storage_capacity_mb__sum']
+    context['faculty_storage_free_mb'] = context['faculty_storage_capacity_mb']-context['faculty_storage_used_mb']
+    if context['faculty_storage_capacity_mb'] > 0:
+        context['faculty_storage_used_percent'] = int(100*context['faculty_storage_used_mb']/context['faculty_storage_capacity_mb'])
+        context['faculty_storage_free_percent'] = 100-int(100*context['faculty_storage_used_mb']/context['faculty_storage_capacity_mb'])
     else:
         context['faculty_storage_used_percent'] = 0
         context['faculty_storage_free_percent'] = 100
     
-    try:
-        membership = FacultyMembership.objects.get(faculty=faculty, member=request.user)
-        context['faculty_user_role'] = dict(FacultyMembership.FACULTY_ROLES).get(membership.role, 'unknown')
-    except FacultyMembership.DoesNotExist:
-        membership = None
-        context['faculty_user_role'] = "—"
+    context['faculty_projects'] = []
+    for project in project_qs:
+        membership = project.get_membership(request.user)
+        context['faculty_projects'].append({
+            'id': project.id,
+            'title': project.title,
+            'storage_capacity_mb': project.storage_capacity_mb,
+            'storage_used_mb': project.storage_used_mb,
+            'creation_time': project.creation_time,
+            'update_time': project.update_time,
+            
+            'user_role': membership and membership.get_role_nice() or "—",
+        })
     
-    if membership and membership.role == "M":
-        
-        formset = modelformset_factory(
-                FacultyMembership,
-                form=FacultyMembershipForm,
-                extra=5
-            )
-            
-        if request.method == "GET":
-            formset = formset(queryset=faculty.facultymembership_set.all())
-            context['faculty_membership_formset'] = formset
-            
-        if request.method == "POST":
-            formset = formset(request.POST, queryset=faculty.facultymembership_set.all())
-            
-            if formset.is_valid():
-                formset.save()
-            
-        context['faculty_membership_formset'] = formset  
+    context['faculty_spacerequests'] = []
+    context['faculty_spacerequests_pendingcount'] = 0
+    context['faculty_spacerequests_approvedcount'] = 0
+    context['faculty_spacerequests_rejectedcount'] = 0
+    for spacerequest in spacerequest_qs:
+        context['faculty_spacerequests'].append({
+            'id': spacerequest.id,
+            'size_mb': spacerequest.size_mb,
+            'status': spacerequest.get_status_nice(),
+            'requested_by': spacerequest.requested_by,
+            'update_time': spacerequest.update_time,
+            'project_title': spacerequest.project.title,
+        })
+        context['faculty_spacerequests_pendingcount' ] += (spacerequest.status == SpaceRequest.STATUS_PENDING  and 1 or 0)
+        context['faculty_spacerequests_approvedcount'] += (spacerequest.status == SpaceRequest.STATUS_APPROVED and 1 or 0)
+        context['faculty_spacerequests_rejectedcount'] += (spacerequest.status == SpaceRequest.STATUS_REJECTED and 1 or 0)
+    
+    project_membership_qs = ProjectMembership.objects.filter(project__faculty=faculty, member=request.user)
+    
+    role_count_dict = {}
+    for project_membership in project_membership_qs:
+        role_count_dict[project_membership.get_role_nice()] = role_count_dict.get(project_membership.get_role_nice(), 0)+1
+    
+    role_list = [
+        {'name': "Manager"               , 'count': pd['membership'] and pd['membership'].role == FacultyMembership.MANAGER  and -1 or 0},
+        {'name': "Approver"              , 'count': pd['membership'] and pd['membership'].role == FacultyMembership.APPROVER and -1 or 0},
+        {'name': "Principal Investigator", 'count': role_count_dict.get("Principal Investigator", 0)},
+        {'name': "Data Manager"          , 'count': role_count_dict.get("Data Manager"          , 0)},
+        {'name': "Collaborator"          , 'count': role_count_dict.get("Collaborator"          , 0)},
+        {'name': "Researcher"            , 'count': role_count_dict.get("Researcher"            , 0)},
+    ]
+    
+    context['role_list'] = role_list
     
     return render(request, template, context)
 
@@ -207,6 +317,7 @@ def view_project_info(request, id=None):
     
     fillpermissions()
     
+    spacerequest_qs = SpaceRequest.objects.filter(project=project).order_by("-update_time")
     membership_qs = ProjectMembership.objects.filter(project=project).order_by("member__last_name")
     
     form = ProjectForm(form_method, instance=project)
@@ -225,6 +336,7 @@ def view_project_info(request, id=None):
         
         if form.is_valid() and membership_formset.is_valid():
             project = form.save(commit=False)
+            project.update_time = datetime.datetime.now()
             project.save()
             if faculty != project.faculty:
                 pass; pass; pass # todo: check permissions in other faculty (can we move to it?)
@@ -296,6 +408,16 @@ def view_project_info(request, id=None):
         context['project_storage_used_percent'] = 0
         context['project_storage_free_percent'] = 100
     
+    context['project_spacerequests'] = []
+    for spacerequest in spacerequest_qs:
+        context['project_spacerequests'].append({
+            'id': spacerequest.id,
+            'size_mb': spacerequest.size_mb,
+            'status': spacerequest.get_status_nice(),
+            'requested_by': spacerequest.requested_by,
+            'update_time': project.update_time,
+        })
+    
     return render(request, template, context)
 
 @login_required(login_url='/login')
@@ -326,6 +448,7 @@ def view_project_create_request(request, id=None):
     spacerequest.requested_by = request.user
     spacerequest.action_time  = None
     spacerequest.actioned_by  = None
+    spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
     print(spacerequest.id)
@@ -393,6 +516,7 @@ def view_request_info(request, id=None):
             if project != spacerequest.project:
                 return view_error(request, "project change ??!?!?")
             
+            spacerequest.update_time  = datetime.datetime.now()
             spacerequest.save()
             context['spacerequest_form_commited'] = True
         else:
@@ -449,6 +573,7 @@ def view_request_activate(request, id=None):
     spacerequest.request_time = datetime.datetime.now()
     spacerequest.requested_by = request.user
     spacerequest.status = SpaceRequest.STATUS_PENDING
+    spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
     return redirect('/request/{}'.format(id))
@@ -486,6 +611,7 @@ def view_request_approve(request, id=None):
     spacerequest.action_time = datetime.datetime.now()
     spacerequest.actioned_by = request.user
     spacerequest.status = SpaceRequest.STATUS_APPROVED
+    spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
     return redirect('/request/{}'.format(id))
@@ -518,6 +644,7 @@ def view_request_reject(request, id=None):
     spacerequest.action_time = datetime.datetime.now()
     spacerequest.actioned_by = request.user
     spacerequest.status = SpaceRequest.STATUS_REJECTED
+    spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
     return redirect('/request/{}'.format(id))

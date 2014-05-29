@@ -2,103 +2,354 @@
 
 {% block 'breadcrumb' %}
   <span class="crumb-sep">&gt;</span>
-  <span class="crumb-part">Faculty {{ faculty.id }}</span>
+  <span class="crumb-part">Faculty {{ fculty_id }}</span>
 {% endblock %}
 
 {% block 'body' %}
-  <div class="col-md-12">
-    <div class="dashboard-div">
-      <div class="well list-well">
-        <div class="row">
-          <div class="col-xs-2 project-info-title-label">
-            Faculty Title:
-          </div>
-          <div class="col-md-10 project-info-title">
-            {{ faculty_name }}
-          </div>
+  <form id="project-form" action="" method="post">{% csrf_token %}
+    <div class="col-md-12">
+      {% if project_form_commited %}
+        <div class="panel panel-success">
+          <div class="panel-heading">Your changes have been saved.</div>
         </div>
-        <div class="row">
-          <div class="col-xs-2 project-info-detail-label">
-            Creation Date:
-          </div>
-          <div class="col-md-3 project-info-detail">
-            {{ faculty_creation_date }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-2 project-info-detail-label">
-            My Role:
-          </div>
-          <div class="col-md-5 project-info-detail">
-            {{ faculty_user_role }}
-          </div>
-          <div class="col-xs-2 project-info-detail-label">
-            Update Date:
-          </div>
-          <div class="col-md-3 project-info-detail">
-            {{ faculty_update_date }}
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-xs-2 project-info-detail-label">
-            Storage Space:
-          </div>
-          <div class="col-md-6 project-info-detail">
-            <div class="progress progress-striped active project-info-storage-progress">
-              <div class="project-info-storage">
-                {{ faculty.storage_used_mb }}MB of {{ faculty.storage_capacity_mb }}MB ({{ faculty_storage_used_percent }}%)
-              </div>
-              <div class="progress-bar progress-bar project-info-storage-bar" style="width: {{ project_storage_used_percent }}%"> 
-              </div>
-              <div class="progress-bar progress-bar-info project-info-storage-bar" style="width: {{ project_storage_free_percent }}%"></div>
-            </div>
-          </div>
-          <div class="col-md-4">
-              <div class="btn-group">
-                {% if faculty_user_role == "Data Manager" %}
-                  <a href="/project/{{ project.id }}/request"><div class="btn btn-default">Request Additional Space</div></a>
+      {% endif %}
+      {% if project_form_bad %}
+        <div class="panel panel-danger">
+          <div class="panel-heading">There was an error submitting your changes.</div>
+          <ul class="list-group">
+           {% if form.non_field_errors %}
+             {% for error in form.non_field_errors %}
+               <li class="list-group-item">
+                 <strong>&#x2014;</strong>: {{ error }}
+               </li>
+             {% endfor %}
+           {% endif %}
+           {% for field in form %}
+             {% if field.errors %}
+               {% for error in field.errors %}
+                 <li class="list-group-item">
+                   <strong>{{ field.label }}</strong>: {{ error }}
+                 </li>
+               {% endfor %}
+             {% endif %}
+           {% endfor %}
+           {% for error in membership_formset.non_field_errors %}
+             <li class="list-group-item">
+               <strong>&#x2014;</strong>: {{ error }}
+             </li>
+           {% endfor %}
+           {% for form in membership_formset %}
+             {% for error in form.non_field_errors %}
+               <li class="list-group-item">
+                 {{ error }}
+               </li>
+             {% endfor %}
+             {% for field in form %}
+               {% if field.errors %}
+                  {% for error in field.errors %}
+                    <li class="list-group-item">
+                      <strong>{{ field.label }}</strong>: {{ error }}
+                    </li>
+                  {% endfor %}
                 {% endif %}
-                <a href="/project/{{ project.id }}/edit"><div class="btn btn-default">Edit Project</div></a>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <div class="dashboard-div">
+        {{ form.id }}
+        <div class="well list-well">
+          <div class="row">
+            <div class="col-xs-2 project-info-title-label">
+              Faculty Name:
+            </div>
+            <div class="col-md-9 project-info-title">
+              <div class="project-info-only">
+                {{ faculty_name }}
               </div>
+              <div class="project-edit-only project-edit-title">
+                {{ form.name }}
+              </div>
+            </div>
+            <div class="col-md-1 project-info-title"></div>
+          </div>
+          <div class="row faculty-roles-row">
+            <div class="col-xs-2 project-info-detail-label">
+              My Roles:
+            </div>
+            <div class="col-md-9 project-info-detail">
+              {% for role in role_list %}
+                {% if role.count != 0 %}
+                  <span>
+                    {% if role.count > 0 %}
+                      {{ role.name }}&nbsp;<span>({{ role.count }});</span>
+                    {% else %}
+                      {{ role.name }};
+                    {% endif %}
+                  </span>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="col-md-1 project-info-title"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-5 project-info-detail" style="border-right: 1px solid #CCCCCC;">
+              <div class="row">
+                <div class="col-xs-8">
+                  <div class="row">
+                    <div class="col-xs-7 project-info-detail-label">
+                      Project Count:
+                    </div>
+                    <div class="col-xs-5 project-info-detail">
+                      <span>{{ faculty_projects|length }}</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-7 project-info-detail-label">
+                      Storage Used:
+                    </div>
+                    <div class="col-xs-5 project-info-detail">
+                      <span>{{ faculty_storage_used_mb }}</span><span>MB</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-7 project-info-detail-label">
+                      Capacity:
+                    </div>
+                    <div class="col-xs-5 project-info-detail">
+                      <span>{{ faculty_storage_capacity_mb }}</span><span>MB</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-4">
+                  <canvas id="faculty-storage-chart" width="96" height="96"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 project-info-detail" style="border-right: 1px solid #CCCCCC;">
+              <div class="row">
+                <div class="col-xs-9 project-info-detail-label">
+                  Pending requests:
+                </div>
+                <div class="col-xs-3 project-info-detail">
+                  {{ faculty_spacerequests_pendingcount }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-9 project-info-detail-label">
+                  Approved requests:
+                </div>
+                <div class="col-xs-3 project-info-detail">
+                  {{ faculty_spacerequests_approvedcount }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-9 project-info-detail-label">
+                  Rejected requests:
+                </div>
+                <div class="col-xs-3 project-info-detail">
+                  {{ faculty_spacerequests_rejectedcount }}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 project-info-detail">
+              <div class="row">
+                <div class="col-xs-4 project-info-detail-label">
+                  Created:
+                </div>
+                <div class="col-xs-8 project-info-detail">
+                  {{ faculty_creation_time }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4 project-info-detail-label">
+                  Updated:
+                </div>
+                <div class="col-xs-8 project-info-detail">
+                  {{ faculty_update_time }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="btn-group">
+                    {% if 1 %}
+                      <a class="btn btn-default project-info-only" href="/faculty/{{ faculty_id }}/create">Create Project</a>
+                    {% endif %}
+                    {% if can_edit %}
+                      <button id="edit-button" class="btn btn-default project-info-only" onClick="return false;">Edit Faculty</button>
+                    {% endif %}
+                    <button id="submit-button" class="btn btn-success project-edit-only" onClick="return false;">Submit</button>
+                    <button id="cancel-button" class="btn btn-warning project-edit-only" onClick="return false;">Cancel</button>
+                  </div>
+                  <div class="btn-group">
+                    {% if can_delete %}
+                      <a href="/faculty/{{ faculty_id }}/delete" class="btn btn-danger project-edit-only">Delete</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-5">
-    <div class="dashboard-div">
-      <h2><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</h2>
-      <div class="well list-well">
-        <div id="faculty-box" class="listBox">
-          {% for member_info in faculty_members %}
-            <div class="listEntry list-group-item">
-              <span class="listEntryTitle">
-                <div>
-                  <a href="/user/{{ member_info.user.id }}">{{ member_info.user.first_name }} {{ member_info.user.last_name }}</a>
-                </div>
-                <div>
-                  {{ member_info.role }}
-                </div>
-              </span>
+    <div class="col-md-5">
+      <div class="dashboard-div">
+        <ul class="nav nav-tabs">
+          <li class="info-tab-header active">
+            <a href="#members" data-toggle="tab"><span class="glyphicon glyphicon-user dashboard-icon"></span>Members</a>
+          </li>
+          <li class="info-tab-header">
+            <a href="#requests" data-toggle="tab"><span class="glyphicon glyphicon-tasks dashboard-icon"></span>Requests</a>
+          </li>
+        </ul>
+        <div class="well list-well">
+          <div class="tab-content">
+            <div class="tab-pane active" id="members">
+              <div id="faculty-box" class="listBox">
+                {{ membership_formset.management_form }}
+                {% for member_info in faculty_members %}
+                  <div class="listEntry list-group-item">
+                    <span class="listEntryTitle">
+                      <div>
+                        <a href="/user/{{ member_info.id }}">{{ member_info.first_name }} {{ member_info.last_name }}</a>
+                      </div>
+                      <div class="project-edit-only">
+                        {{ member_info.membership_form.id }}
+                        {% if member_info.is_addition %}
+                          {{ member_info.membership_form.member }}
+                        {% else %}
+                          {{ member_info.membership_form.member.as_hidden }}
+                        {% endif %}
+                        {{ member_info.membership_form.role }}
+                      </div>
+                      <div class="project-info-only">
+                        {{ member_info.role }}
+                      </div>
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
-          {% endfor %}
+            <div class="tab-pane" id="requests">
+              <div id="faculty-box" class="listBox">
+                {% if faculty_spacerequests|length == 0 %}
+                  <div class="notification-absence-text">
+                    No space requests.
+                  </div>
+                {% endif %}
+                {% for spacerequest in faculty_spacerequests %}
+                  <div class="listEntry list-group-item">
+                    <span class="listEntryTitle">
+                      <div class="row">
+                        <a href="/request/{{ spacerequest.id }}">
+                          <div class="col-md-12">
+                              {{ spacerequest.project_title }}
+                          </div>
+                          <div class="col-md-8">
+                            <span>Space increase:</span>
+                            <span>+</span>
+                            <span>{{ spacerequest.size_mb }}</span>
+                            <span>MB</span>
+                          </div>
+                        </a>
+                        <div class="col-md-4 alignright">
+                          {{ spacerequest.status }}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="col-md-7">
-    <div class="dashboard-div">
-      <h2><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Faculty History</h2>
-      <div class="well list-well">
-        <div id="faculty-box" class="listBox">
-          stuff
+    <div class="col-md-7">
+      <div class="dashboard-div">
+        <ul class="nav nav-tabs">
+          <li class="active info-tab-header">
+            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
+          </li>
+          <li class="info-tab-header">
+            <a href="#projectlist" data-toggle="tab"><span class="glyphicon glyphicon-list dashboard-icon"></span>Project List</a>
+          </li>
+          <li class="info-tab-header">
+            <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
+          </li>
+        </ul>
+        <div class="well list-well">
+          <div class="tab-content">
+            <div class="tab-pane active" id="history">
+                history
+            </div>
+            <div class="tab-pane" id="projectlist">
+                {% for project in faculty_projects %}
+                  <div class="listEntry list-group-item">
+                    <div class="row">
+                      <div class="listEntryTitle col-md-12">
+                        <a href="/project/{{ project.id }}">{{ project.title }}</a>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="listEntryDetail col-md-3 dashboard-project-role">
+                        {{ project.user_role }}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+            </div>
+            <div class="tab-pane" id="comments">
+                comments
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  things
-  {% for form in faculty_membership_formset %}
-    {{ form.as_p }}
-  {% endfor %}
+  </form>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script>
+    $(document).ready(function(){
+        function showEdit() {
+            $(".project-info-only").hide();
+            $(".project-edit-only").show();
+        }
+        function hideEdit() {
+            $(".project-info-only").show();
+            $(".project-edit-only").hide();
+        }
+        
+        $("#edit-button").click(function(){ showEdit(); })
+        $("#cancel-button").click(function(){ hideEdit(); })
+        $("#submit-button").click(function(){
+            $("#project-form").submit();
+        });
+        
+        $('#id_name').autosize({append: ""});
+        $(".project-edit-only").hide();
+        $('#id_name').keypress(function(event) {
+            if(event.which == '13') {
+                return false;
+            }
+            $('#id_name').autosize({append: ""});
+        });
+        
+        $(".member-select").searchit({size: 15, dropDownClass: 'member-select-wrap'});
+        
+        {% if edit_mode %}
+          showEdit();
+        {% endif %}
+        
+        var pieData = [
+			{value: {{ faculty_storage_used_mb }}, color: "#F38630"},
+			{value: {{ faculty_storage_free_mb }}, color: "#C0C4AC"},
+		];
+	    var myPie = new Chart(document.getElementById("faculty-storage-chart").getContext("2d")).Pie(pieData);
+    });
+  </script>
 {% endblock %}
+
+
 

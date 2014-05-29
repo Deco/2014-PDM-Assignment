@@ -181,7 +181,38 @@
               </div>
             </div>
             <div class="tab-pane" id="requests">
-                requests
+              <div id="faculty-box" class="listBox">
+                {% if project_spacerequests|length == 0 %}
+                  <div class="notification-absence-text">
+                    No space requests.
+                  </div>
+                {% endif %}
+                {% for spacerequest in project_spacerequests %}
+                  <div class="listEntry list-group-item">
+                    <span class="listEntryTitle">
+                      <div class="row">
+                        <div class="col-md-7">
+                          <a href="/request/{{ spacerequest.id }}">
+                            <span>Space increase:</span>
+                            <span>+</span>
+                            <span>{{ spacerequest.size_mb }}</span>
+                            <span>MB</span>
+                          </a>
+                        </div>
+                        <div class="col-md-5 alignright">
+                          {{ spacerequest.update_time|date:"y-m-d h:iA" }}
+                        </div>
+                        <div class="col-md-4">
+                          {{ spacerequest.status }}
+                        </div>
+                        <div class="col-md-8 alignright">
+                          {{ spacerequest.requested_by }}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
           </div>
         </div>
@@ -191,7 +222,7 @@
       <div class="dashboard-div">
         <ul class="nav nav-tabs">
           <li class="active info-tab-header">
-            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-th-list dashboard-icon"></span>History</a>
+            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
           </li>
           <li class="info-tab-header">
             <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
@@ -201,9 +232,6 @@
           <div class="tab-content">
             <div class="tab-pane active" id="history">
                 history
-            </div>
-            <div class="tab-pane" id="requests">
-                requests
             </div>
             <div class="tab-pane" id="comments">
                 comments

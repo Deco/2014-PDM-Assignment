@@ -1,5 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
+
+
+def user_unicode(self):
+    return  u'%s %s' % (self.first_name, self.last_name)
+
+User.__unicode__ = user_unicode
 
 class Faculty(models.Model):
     name    = models.CharField(max_length=1024, null=False)
@@ -131,6 +138,7 @@ class SpaceRequest(models.Model):
     requested_by    = models.ForeignKey(User, related_name='requests', null=False)
     action_time     = models.DateTimeField(null=True, blank=True)
     actioned_by     = models.ForeignKey(User, related_name='actions', null=True, blank=True)
+    update_time     = models.DateTimeField(auto_now_add=True, blank=True)
     
     def __unicode__(self):
         return str(self.project) + ' ' + str(self.request_time) + ' (' + str(self.size_mb) + ')'

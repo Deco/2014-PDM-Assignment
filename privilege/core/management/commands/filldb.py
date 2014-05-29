@@ -42,8 +42,7 @@ class Command(BaseCommand):
                         faculty,
                         zip(randomUsers, ['P','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M'])
                     )
-
-
+    
     def _make_user(self, username, first_name, last_name, password, is_admin):
         print(username, first_name, last_name, password)
         return self._make(User,
@@ -61,7 +60,7 @@ class Command(BaseCommand):
             print("wtf", pair[0], pair[1])
             self._make(FacultyMembership,
                 faculty=faculty,
-                member=User.objects.get(username=pair[0]),
+                member=pair[0],
                 role=pair[1]
             )
         return faculty
@@ -78,7 +77,7 @@ class Command(BaseCommand):
         for pair in members:
             self._make(ProjectMembership,
                 project=project,
-                member=User.objects.get(username=pair[0]),
+                member=pair[0],
                 role=pair[1]
             )
         return project
