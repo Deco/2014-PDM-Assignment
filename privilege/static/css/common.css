@@ -32,27 +32,27 @@ body {
 }
 
 #notification-box {
-    min-height: 15%;
-    max-height: 30%;
+    min-height: 83px;
+    max-height: 300px;
     overflow: auto;
 }
 
 #faculty-box {
     min-height: 15%;
-    max-height: 30%;
+    /*max-height: 30%;*/
     overflow: auto;
 }
 
 #project-box {
     min-height: 30%;
-    max-height: 70%;
-    min-height: 70%;
+    /*max-height: 70%;*/
     overflow: auto;
 }
 
 .notification-absence-text {
     /*font-style: italic;*/
     padding-top: 30px;
+    padding-bottom: 30px;
     text-align: center;
     color: #888899;
 }
@@ -76,6 +76,9 @@ body {
     height: 69px;
     line-height: 39.599998474121094px;
 }
+.crumb-root a {
+    color: inherit;
+}
 
 .crumb-sep {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -97,6 +100,10 @@ body {
     text-align: center;
     margin-top: 0px;
 }
+.crumb-part a {
+    color: inherit;
+}
+
 .edgebar {
     background-color: rgb(111, 84, 153);
     background-image: linear-gradient(rgb(86, 61, 124) 0px, rgb(111, 84, 153) 100%);
@@ -250,6 +257,12 @@ body {
 }
 .info-tab-header a {
     color: #326baa;
+}
+
+.history-icon {
+    font-size: 30px;
+    text-align: center;
+    padding-top: 5px;
 }
 
 .project-info-row {

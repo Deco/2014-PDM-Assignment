@@ -19,7 +19,7 @@ class Command(BaseCommand):
             for userI in range(userCount):
                 choice = self.userChoices[userI]
                 userList.append(
-                    self._make_user(str(userI), choice[0], choice[1], choice[2], (userCount == 0))
+                    self._make_user(str(userI+1), choice[0], choice[1], choice[2], (userCount == 0))
                 )
             
             print(userList)

@@ -1,6 +1,9 @@
 {% extends "common.html" %}
+{% load humanize %}
 
 {% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part"><a href="/faculty/{{ project_faculty_id }}">Faculty {{ project_faculty_id }}</a></span>
   <span class="crumb-sep">&gt;</span>
   <span class="crumb-part">Project {{ project_id }}</span>
 {% endblock %}
@@ -114,7 +117,7 @@
             <div class="col-md-6 project-info-detail">
               <div class="progress progress-striped active project-info-storage-progress">
                 <div class="project-info-storage">
-                  {{ project_storage_used_mb }}MB of {{ project_storage_capacity_mb }}MB ({{ project_storage_used_percent }}%)
+                  {{ project_storage_used_mb|intcomma }}MB of {{ project_storage_capacity_mb|intcomma }}MB ({{ project_storage_used_percent }}%)
                 </div>
                 <div class="progress-bar progress-bar project-info-storage-bar" style="width: {{ project_storage_used_percent }}%"> 
                 </div>
@@ -123,7 +126,7 @@
             </div>
             <div class="col-md-4">
               <div class="btn-group">
-                {% if project_user_role == "Data Manager" %}
+                {% if can_request %}
                   <a class="btn btn-default project-info-only" href="/project/{{ project_id }}/request">Request Additional Space</a>
                 {% endif %}
                 {% if can_edit %}
@@ -195,7 +198,7 @@
                           <a href="/request/{{ spacerequest.id }}">
                             <span>Space increase:</span>
                             <span>+</span>
-                            <span>{{ spacerequest.size_mb }}</span>
+                            <span>{{ spacerequest.size_mb|intcomma }}</span>
                             <span>MB</span>
                           </a>
                         </div>
@@ -231,10 +234,56 @@
         <div class="well list-well">
           <div class="tab-content">
             <div class="tab-pane active" id="history">
-                history
+              {% for historyevent in project_historyevents %}
+                <div class="listEntry list-group-item">
+                  <div class="row">
+                    <div class="col-xs-1 history-icon">
+                      <span class="glyphicon glyphicon-{{ historyevent.glyphicon }}"></span>
+                    </div>
+                    <div class="col-xs-11">
+                      <div class="row">
+                        <div class="listEntryTitle col-xs-4">
+                          {{ historyevent.kind }}
+                        </div>
+                        <div class="listEntryDetail col-xs-4">
+                          {{ historyevent.referenced_user_primary }}
+                        </div>
+                        <div class="listEntryDetail col-xs-4">
+                          {{ historyevent.occurence_time }}
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="listEntryDetail col-xs-12">
+                          {{ historyevent.note }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
             <div class="tab-pane" id="comments">
-                comments
+              {% load comments %}
+              {% get_comment_list for comment_object as comment_list %}
+              {% for comment in comment_list %}
+                <a name="c{{ comment.id }}"></a>
+                <a href="{% get_comment_permalink comment %}">
+                  permalink for comment #{{ forloop.counter }}
+                </a>
+              {% endfor %}
+              <div class="comment-form">
+                {% get_comment_form for comment_object as comment_form %}
+                <form action="{% comment_form_target %}" method="POST">
+                  <div>{{ comment_form.comment }}</div>
+                  <div>{{ comment_form.honeypot }}</div>
+                  <div>{{ comment_form.content_type }}</div>
+                  <div>{{ comment_form.object_pk }}</div>
+                  <div>{{ comment_form.timestamp }}</div>
+                  <div>{{ comment_form.security_hash }}</div>
+                  <div><input type="hidden" name="next" value="/project/{{ project_id }}#comments" /></div>
+                  <div><button id="comment-submit" /></div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

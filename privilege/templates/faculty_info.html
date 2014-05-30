@@ -1,8 +1,9 @@
 {% extends "common.html" %}
+{% load humanize %}
 
 {% block 'breadcrumb' %}
   <span class="crumb-sep">&gt;</span>
-  <span class="crumb-part">Faculty {{ fculty_id }}</span>
+  <span class="crumb-part">Faculty {{ faculty_id }}</span>
 {% endblock %}
 
 {% block 'body' %}
@@ -110,7 +111,7 @@
                       Storage Used:
                     </div>
                     <div class="col-xs-5 project-info-detail">
-                      <span>{{ faculty_storage_used_mb }}</span><span>MB</span>
+                      <span>{{ faculty_storage_used_mb|intcomma }}</span><span>MB</span>
                     </div>
                   </div>
                   <div class="row">
@@ -118,7 +119,7 @@
                       Capacity:
                     </div>
                     <div class="col-xs-5 project-info-detail">
-                      <span>{{ faculty_storage_capacity_mb }}</span><span>MB</span>
+                      <span>{{ faculty_storage_capacity_mb|intcomma }}</span><span>MB</span>
                     </div>
                   </div>
                 </div>
@@ -250,7 +251,7 @@
                           <div class="col-md-8">
                             <span>Space increase:</span>
                             <span>+</span>
-                            <span>{{ spacerequest.size_mb }}</span>
+                            <span>{{ spacerequest.size_mb|intcomma }}</span>
                             <span>MB</span>
                           </div>
                         </a>
@@ -283,6 +284,11 @@
         <div class="well list-well">
           <div class="tab-content">
             <div class="tab-pane active" id="history">
+              {% if faculty_historyevents|length == 0 %}
+                <div class="notification-absence-text">
+                  There is no history.
+                </div>
+              {% endif %}
               {% for historyevent in faculty_historyevents %}
                 <div class="listEntry list-group-item">
                   <div class="row">
@@ -308,12 +314,18 @@
                 {% for project in faculty_projects %}
                   <div class="listEntry list-group-item">
                     <div class="row">
-                      <div class="listEntryTitle col-md-12">
+                      <div class="listEntryTitle col-md-8">
                         <a href="/project/{{ project.id }}">{{ project.title }}</a>
+                      </div>
+                      <div class="listEntryTitle col-md-4">
+                        {{ project.update_time }}
                       </div>
                     </div>
                     <div class="row">
-                      <div class="listEntryDetail col-md-3 dashboard-project-role">
+                      <div class="listEntryTitle col-md-8">
+                        {{ project.storage_used_mb|intcomma }}MB of {{ project.storage_capacity_mb|intcomma }}MB
+                      </div>
+                      <div class="listEntryTitle col-md-4">
                         {{ project.user_role }}
                       </div>
                     </div>

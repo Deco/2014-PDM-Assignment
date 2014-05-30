@@ -1,6 +1,12 @@
 {% extends "common.html" %}
+{% load humanize %}
+{% load tz %}
 
 {% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part"><a href="/faculty/{{ project_faculty_id }}">Faculty {{ project_faculty_id }}</a></span>
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part"><a href="/project/{{ project_id }}">Project {{ project_id }}</a></span>
   <span class="crumb-sep">&gt;</span>
   <span class="crumb-part">Request {{ spacerequest_id }}</span>
 {% endblock %}
@@ -20,7 +26,7 @@
            {% if form.non_field_errors %}
              {% for error in form.non_field_errors %}
                <li class="list-group-item">
-                 <strong>&#x2014;</strong>: {{ error }}a
+                 <strong>&#x2014;</strong>: {{ error }}
                </li>
              {% endfor %}
            {% endif %}
@@ -28,7 +34,7 @@
              {% if field.errors %}
                {% for error in field.errors %}
                  <li class="list-group-item">
-                   <strong>{{ field.label }}</strong>: {{ error }}b
+                   <strong>{{ field.label }}</strong>: {{ error }}
                  </li>
                {% endfor %}
              {% endif %}
@@ -98,7 +104,7 @@
               Requested:
             </div>
             <div class="col-md-4 project-info-detail">
-              <i>by</i> {{ spacerequest_requested_by }} <i>on</i> {{ spacerequest_request_time }} 
+              <i>by</i> {{ spacerequest_requested_by }} <i>on</i> {{ spacerequest_request_time|localtime }} 
             </div>
           </div>
           <div class="row">
@@ -106,15 +112,15 @@
               Current Space:
             </div>
             <div class="col-md-4 project-info-detail">
-              {{ project_storage_capacity_mb }}
+              {{ project_storage_capacity_mb|intcomma }}
               <span>MB</span>
             </div>
             <div class="col-xs-2 project-info-detail-label">
               Actioned:
             </div>
             <div class="col-md-4 project-info-detail">
-              {% if spacerequest_action_time %}
-                <i>by</i> {{ spacerequest_actioned_by }} <i>on</i> {{ spacerequest_action_time }} 
+              {% if spacerequest_action_time|localtime %}
+                <i>by</i> {{ spacerequest_actioned_by }} <i>on</i> {{ spacerequest_action_time|localtime }} 
               {% else %}
                 &#x2014;&#x2014;&#x2014;&#x2014;
               {% endif %}
@@ -127,7 +133,7 @@
             <div class="col-md-4 project-info-detail">
               <span>+</span>
               <span class="project-info-only">
-                {{ spacerequest_size_mb }}
+                {{ spacerequest_size_mb|intcomma }}
               </span>
               <span class="project-edit-only">
                 {{ form.size_mb }}
@@ -171,7 +177,26 @@
         <div class="well list-well">
           <div class="tab-content">
             <div class="tab-pane active" id="history">
-                history
+              {% for historyevent in spacerequest_historyevents %}
+                <div class="listEntry list-group-item">
+                  <div class="row">
+                    <div class="listEntryTitle col-md-4">
+                      {{ historyevent.kind }}
+                    </div>
+                    <div class="listEntryDetail col-md-4">
+                      {{ historyevent.referenced_user_primary }}
+                    </div>
+                    <div class="listEntryDetail col-md-4">
+                      {{ historyevent.occurence_time|localtime }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="listEntryDetail col-md-12">
+                      {{ historyevent.note }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
             <div class="tab-pane" id="requests">
                 requests

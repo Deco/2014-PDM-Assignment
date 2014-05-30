@@ -1,4 +1,6 @@
 {% extends "common.html" %}
+{% load humanize %}
+{% load tz %}
 
 {% block 'breadcrumb' %}
   <span class="crumb-sep">&gt;</span>
@@ -11,21 +13,35 @@
       <h1>Notifications</h1>
       <div class="well list-well">
         <div id="notification-box" class="listBox">
-          <!--<div class="listEntry list-group-item">
-            <span class="listEntryTitle">Request approved: increase project space</span>
-            <br/>
-            <span class="notification-info">Project: Explosives in space</span>
-          </div>-->
-          <div class="notification-absence-text">
-            You have no unread notifications.
-          </div>
+          {% if historyevents|length == 0 %}
+            <div class="notification-absence-text">
+              You have no unread notifications.
+            </div>
+          {% endif %}
+          {% for historyevent in historyevents %}
+            <div class="listEntry list-group-item">
+              <div class="row">
+                <div class="listEntryTitle col-md-6">
+                  {{ historyevent.kind }}
+                </div>
+                <div class="listEntryDetail col-md-6">
+                  {{ historyevent.occurence_time|localtime }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="listEntryDetail col-md-12">
+                  {{ historyevent.note }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
     <div class="dashboard-div">
       <h1>My Faculties</h1>
       <div class="well list-well">
-        <div id="faculty-box" class="listBox">
+        <div id="faculty-box" class="">
           {% for faculty in faculties %}
             <div class="list-group-item listEntry">
               <div class="listEntryTitle">
@@ -54,7 +70,7 @@
     <div class="dashboard-div">
       <h1>My Projects</h1>
       <div class="well list-well">
-        <div id="project-box" class="listBox">
+        <div id="project-box" class="">
           {% for project in projects %}
             <div class="listEntry list-group-item">
               <div class="row">

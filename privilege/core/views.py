@@ -11,7 +11,7 @@ from core.forms import *
 from core.history import *
 from django.forms.models import modelformset_factory
 from django.views.generic import CreateView, UpdateView
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 @login_required(login_url='/login')
 def view_dashboard(request):
@@ -41,8 +41,8 @@ def view_dashboard(request):
             role_count_dict[project_membership.get_role_nice()] = role_count_dict.get(project_membership.get_role_nice(), 0)+1
         
         role_list = [
-            {'name': "Manager"               , 'count': faculty_membership and faculty_membership.role == FacultyMembership.MANAGER  and -1 or 0},
-            {'name': "Approver"              , 'count': faculty_membership and faculty_membership.role == FacultyMembership.APPROVER and -1 or 0},
+            {'name': "Faculty Manager"       , 'count': faculty_membership and faculty_membership.role == FacultyMembership.MANAGER  and -1 or 0},
+            {'name': "Faculty Approver"      , 'count': faculty_membership and faculty_membership.role == FacultyMembership.APPROVER and -1 or 0},
             {'name': "Principal Investigator", 'count': role_count_dict.get("Principal Investigator", 0)},
             {'name': "Data Manager"          , 'count': role_count_dict.get("Data Manager"          , 0)},
             {'name': "Collaborator"          , 'count': role_count_dict.get("Collaborator"          , 0)},
@@ -68,6 +68,26 @@ def view_dashboard(request):
             'update_time': project.update_time,
             
             'user_role': membership and membership.get_role_nice() or 'blah',
+        })
+    
+    context['historyevents'] = []
+    historyentry_qs = HistoryEntry.objects.filter(
+            Q(referenced_project__in=projects_qs)
+        |   Q(referenced_faculty__in=faculties_qs)
+        |   Q(referenced_user_primary =request.user)
+        |   Q(referenced_user_secondary=request.user)
+    ).order_by("-occurence_time")
+    for historyentry in historyentry_qs:
+        context['historyevents'].append({
+            'occurence_time': historyentry.occurence_time,
+            'kind': historyentry.get_kind_nice(),
+            'note': historyentry.note,
+            'referenced_project': historyentry.referenced_project,
+            'referenced_faculty': historyentry.referenced_faculty,
+            'referenced_request': historyentry.referenced_request,
+            'referenced_user_primary': historyentry.referenced_user_primary,
+            'referenced_user_secondary': historyentry.referenced_user_secondary,
+            'glyphicon': historyentry.get_kind_glyphicon(),
         })
     
     return render(request, template, context)
@@ -139,11 +159,8 @@ def view_faculty_info(request, id=None):
             return view_error(request, "You do not have permission to edit this faculty.")
         
         if form.is_valid() and membership_formset.is_valid():
-            print("aaa", faculty_curr_name)
-            
             faculty = form.save(commit=False)
             
-            print("bbb", faculty.name)
             change_str_parts = ["Changes: "]
             if faculty_curr_name != faculty.name:
                 change_str_parts.append('Name changed from "{0}" to "{1}";'.format(faculty_curr_name, faculty.name))
@@ -151,14 +168,15 @@ def view_faculty_info(request, id=None):
                 change_str_parts.append('None')
             change_str = ' '.join(change_str_parts)
             
-            faculty.update_time = datetime.datetime.now()
-            faculty.save()
-            
-            record_history(kind=HistoryEntry.FACULTY_EDITED,
-                note=change_str,
-                referenced_faculty=faculty,
-                referenced_user_primary=request.user
-            )
+            if form.has_changed():
+                faculty.update_time = datetime.datetime.now()
+                faculty.save()
+                
+                record_history(kind=HistoryEntry.FACULTY_EDITED,
+                    note=change_str,
+                    referenced_faculty=faculty,
+                    referenced_user_primary=request.user
+                )
             
             post_is_valid = True
             fillpermissions()
@@ -177,22 +195,29 @@ def view_faculty_info(request, id=None):
                 membership_form.instance.delete()
                 
                 record_history(kind=HistoryEntry.FACULTY_MEMBER_REMOVED,
+                    note='User "{0}" removed.'.format(membership.member),
                     referenced_faculty=faculty,
-                    referenced_user_primary=membership_form.instance.member,
-                    referenced_user_secondary=request.user
+                    referenced_user_primary=request.user,
+                    referenced_user_secondary=membership_form.instance.member
                 )
                 
                 membership_form_i += 1
                 continue
+            
+            prev_role_str = (member and FacultyMembership.objects.get(id=membership.id).get_role_nice())
             
             membership = membership_form.save(commit=False)
             membership.faculty = faculty
             membership.save()
             
             record_history(kind=(member and HistoryEntry.FACULTY_MEMBER_CHANGED or HistoryEntry.FACULTY_MEMBER_ADDED),
+                note=(
+                        member and 'User "{0}" changed from "{1}" to "{2}".'.format(membership.member, prev_role_str, membership.get_role_nice())
+                    or             'User "{0}" added as "{1}".'.format(membership.member, membership.get_role_nice())
+                ),
                 referenced_faculty=faculty,
-                referenced_user_primary=membership.member,
-                referenced_user_secondary=request.user
+                referenced_user_primary=request.user,
+                referenced_user_secondary=membership.member
             )
         
         if member: 
@@ -300,7 +325,33 @@ def view_faculty_delete(request, id=None):
 
 @login_required(login_url='/login')
 def view_faculty_create_project(request, id=None):
-    pass
+    try:
+        faculty = Faculty.objects.get(id=id)
+    except Faculty.DoesNotExist:
+        return view_error(request, "Faculty with ID {} does not exist.".format(id))
+    
+    faculty_membership = faculty.get_membership(request.user)
+    if not faculty_membership or faculty_membership.role != FacultyMembership.MANAGER:
+        return view_error(request, 'You must be a "Faculty Manager" to create a project.')
+    
+    project = Project()
+    project.title  = "Untitled project."
+    project.faculty = faculty
+    project.storage_capacity_mb = 1024
+    project.storage_used_mb = 850
+    project.creation_time = datetime.datetime.now()
+    project.update_time = datetime.datetime.now()
+    project.save()
+    
+    record_history(kind=HistoryEntry.PROJECT_CREATED,
+        note='Project created in faculty "{0}"'.format(faculty.name),
+        referenced_faculty=faculty,
+        referenced_project=project,
+        referenced_user_primary=request.user,
+    )
+    
+    return redirect('/project/{}'.format(project.id))
+
 
 @login_required(login_url='/login')
 def view_project_list(request):
@@ -324,8 +375,8 @@ def view_project_info(request, id=None):
     project = None
     faculty = None
     pd = {
-        'project_membership' :None,
-        'faculty_membership' :None,
+        'project_membership': None,
+        'faculty_membership': None,
         'can_edit': False,
         'can_delete': False,
     }
@@ -357,11 +408,18 @@ def view_project_info(request, id=None):
         pd['can_delete'] = pd['faculty_membership'] and (pd['faculty_membership'].role == FacultyMembership.MANAGER)
         context['can_edit'] = pd['can_edit']
         context['can_delete'] = pd['can_delete']
+        context['can_request'] = pd['project_membership'] and (
+                pd['project_membership'].role == ProjectMembership.PRINCIPALINVESTIGATOR
+            or  pd['project_membership'].role == ProjectMembership.DATAMANAGER
+        )
     
     fillpermissions()
     
     spacerequest_qs = SpaceRequest.objects.filter(project=project).order_by("-update_time")
     membership_qs = ProjectMembership.objects.filter(project=project).order_by("member__last_name")
+    
+    project_curr_title = project.title
+    project_curr_faculty = project.faculty
     
     form = ProjectForm(form_method, instance=project)
     context['form'] = form
@@ -379,10 +437,28 @@ def view_project_info(request, id=None):
         
         if form.is_valid() and membership_formset.is_valid():
             project = form.save(commit=False)
-            project.update_time = datetime.datetime.now()
-            project.save()
-            if faculty != project.faculty:
+            
+            change_str_parts = ["Changes: "]
+            if project_curr_title != project.title:
+                change_str_parts.append('Title changed from "{0}" to "{1}";'.format(project_curr_title, project.title))
+            if project_curr_faculty != project.faculty:
+                change_str_parts.append('Faculty changed from "{0}" to "{1}";'.format(project_curr_faculty.id, project.faculty.id))
+            if len(change_str_parts) == 1:
+                change_str_parts.append('None')
+            change_str = ' '.join(change_str_parts)
+            
+            if project_curr_faculty != project.faculty:
                 pass; pass; pass # todo: check permissions in other faculty (can we move to it?)
+            
+            if form.has_changed():
+                project.update_time = datetime.datetime.now()
+                project.save()
+                
+                record_history(kind=HistoryEntry.PROJECT_EDITED,
+                    note=change_str,
+                    referenced_project=project,
+                    referenced_user_primary=request.user,
+                )
             
             faculty = project.faculty
             #objects_tosave_list.append(project)
@@ -398,23 +474,38 @@ def view_project_info(request, id=None):
         membership = membership_form.instance
         member = (membership_form_i < membership_qs.count() and membership.member or None)
         
-        if post_is_valid:
-            if membership_form.has_changed():
-                if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
-                    print("BEFORE: ", membership_qs.count())
-                    membership_form.instance.delete()
-                    print("AFTER: ", membership_qs.count())
-                    membership_form_i += 1
-                    continue
+        if post_is_valid and membership_form.has_changed():
+            if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
+                membership_form.instance.delete()
                 
-                membership = membership_form.save(commit=False)
-                membership.project = project
-                membership.save()
-                #objects_tosave_list.append(membership)
-        else:
-            post_is_valid = False
+                record_history(kind=HistoryEntry.PROJECT_MEMBER_REMOVED,
+                    note='User "{0}" removed.'.format(membership.member),
+                    referenced_project=project,
+                    referenced_user_primary=request.user,
+                    referenced_user_secondary=membership_form.instance.member,
+                )
+                
+                membership_form_i += 1
+                continue
+            
+            prev_role_str = (member and ProjectMembership.objects.get(id=membership.id).get_role_nice())
+            
+            membership = membership_form.save(commit=False)
+            membership.project = project
+            membership.save()
+            #objects_tosave_list.append(membership)
+            
+            record_history(kind=(member and HistoryEntry.PROJECT_MEMBER_CHANGED or HistoryEntry.PROJECT_MEMBER_ADDED),
+                note=(
+                        member and 'User "{0}" changed from "{1}" to "{2}".'.format(membership.member, prev_role_str, membership.get_role_nice())
+                    or             'User "{0}" added as "{1}".'.format(membership.member, membership.get_role_nice())
+                ),
+                referenced_project=project,
+                referenced_user_primary=request.user,
+                referenced_user_secondary=membership.member,
+            )
         
-        if member: 
+        if member:
             member_entry = {
                 'id': member.id,
                 'first_name': member.first_name,
@@ -434,6 +525,7 @@ def view_project_info(request, id=None):
         #for object in objects_tosave_list:
         #    object.save()
         context['project_form_commited'] = True
+        fillpermissions()
     
     context['project_id'] = project.id
     context['project_title'] = project.title
@@ -461,6 +553,23 @@ def view_project_info(request, id=None):
             'update_time': project.update_time,
         })
     
+    context['project_historyevents'] = []
+    historyentry_qs = HistoryEntry.objects.filter(referenced_project=project).order_by("-occurence_time")
+    for historyentry in historyentry_qs:
+        context['project_historyevents'].append({
+            'occurence_time': historyentry.occurence_time,
+            'kind': historyentry.get_kind_nice(),
+            'note': historyentry.note,
+            'referenced_project': historyentry.referenced_project,
+            'referenced_faculty': historyentry.referenced_faculty,
+            'referenced_request': historyentry.referenced_request,
+            'referenced_user_primary': historyentry.referenced_user_primary,
+            'referenced_user_secondary': historyentry.referenced_user_secondary,
+            'glyphicon': historyentry.get_kind_glyphicon(),
+        })
+    
+    context['comment_object'] = project
+    
     return render(request, template, context)
 
 @login_required(login_url='/login')
@@ -478,9 +587,12 @@ def view_project_create_request(request, id=None):
         return view_error(request, "Project with ID {} does not exist.".format(id))
     
     try:
-        membership = ProjectMembership.objects.get(project=project, member=request.user, role=ProjectMembership.DATAMANAGER)
+        membership = ProjectMembership.objects.get(
+            project=project, member=request.user,
+            role__in=[ProjectMembership.DATAMANAGER, ProjectMembership.PRINCIPALINVESTIGATOR]
+        )
     except ProjectMembership.DoesNotExist:
-        return view_error(request, "You must be a 'Data Manager' for this project to create a request (project_id: {})".format(id))
+        return view_error(request, "You must be a 'Data Manager' or 'Principal Investigator' for this project to create a request (project_id: {})".format(id))
     
     spacerequest = SpaceRequest()
     spacerequest.project      = project
@@ -494,7 +606,12 @@ def view_project_create_request(request, id=None):
     spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
-    print(spacerequest.id)
+    record_history(kind=HistoryEntry.SPACE_REQUEST_CREATED,
+        note="Requested additional size: {0}MB".format(spacerequest.size_mb),
+        referenced_request=spacerequest,
+        #referenced_project=spacerequest.project,
+        referenced_user_primary=request.user,
+    )
     
     return redirect('/request/{}'.format(spacerequest.id))
 
@@ -550,6 +667,8 @@ def view_request_info(request, id=None):
     context['can_action'] = can_action
     context['can_delete'] = faculty_membership and (faculty_membership.role == FacultyMembership.MANAGER)
     
+    spacerequest_curr_size_mb = spacerequest.size_mb
+    
     form = SpaceRequestForm(form_method, instance=spacerequest)
     context['form'] = form
     
@@ -559,8 +678,22 @@ def view_request_info(request, id=None):
             if project != spacerequest.project:
                 return view_error(request, "project change ??!?!?")
             
+            change_str_parts = ["Changes: "]
+            if spacerequest_curr_size_mb != spacerequest.size_mb:
+                change_str_parts.append('Requested size addition changed from {0}MB to {1}MB;'.format(spacerequest_curr_size_mb, spacerequest.size_mb))
+            if len(change_str_parts) == 1:
+                change_str_parts.append('None')
+            change_str = ' '.join(change_str_parts)
+            
             spacerequest.update_time  = datetime.datetime.now()
             spacerequest.save()
+            
+            record_history(kind=HistoryEntry.SPACE_REQUEST_EDITED,
+                note=change_str,
+                referenced_request=spacerequest,
+                referenced_user_primary=request.user,
+            )
+            
             context['spacerequest_form_commited'] = True
         else:
             context['spacerequest_form_bad'] = True
@@ -586,6 +719,21 @@ def view_request_info(request, id=None):
     
     context['project_storage_used_mb'] = project.storage_used_mb
     context['project_storage_capacity_mb'] = project.storage_capacity_mb
+    
+    context['spacerequest_historyevents'] = []
+    historyentry_qs = HistoryEntry.objects.filter(referenced_request=spacerequest).order_by("-occurence_time")
+    for historyentry in historyentry_qs:
+        context['spacerequest_historyevents'].append({
+            'occurence_time': historyentry.occurence_time,
+            'kind': historyentry.get_kind_nice(),
+            'note': historyentry.note,
+            'referenced_project': historyentry.referenced_project,
+            'referenced_faculty': historyentry.referenced_faculty,
+            'referenced_request': historyentry.referenced_request,
+            'referenced_user_primary': historyentry.referenced_user_primary,
+            'referenced_user_secondary': historyentry.referenced_user_secondary,
+            'glyphicon': historyentry.get_kind_glyphicon(),
+        })
     
     return render(request, template, context)
 
@@ -618,6 +766,13 @@ def view_request_activate(request, id=None):
     spacerequest.status = SpaceRequest.STATUS_PENDING
     spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
+    
+    record_history(kind=HistoryEntry.SPACE_REQUEST_ACTIVATED,
+        note="Requested additional size: {0}MB".format(spacerequest.size_mb),
+        referenced_request=spacerequest,
+        referenced_project=spacerequest.project,
+        referenced_user_primary=request.user,
+    )
     
     return redirect('/request/{}'.format(id))
 
@@ -657,6 +812,13 @@ def view_request_approve(request, id=None):
     spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
+    record_history(kind=HistoryEntry.SPACE_REQUEST_APPROVED,
+        note="Additional size: {0}MB".format(spacerequest.size_mb),
+        referenced_request=spacerequest,
+        referenced_project=spacerequest.project,
+        referenced_user_primary=request.user,
+    )
+    
     return redirect('/request/{}'.format(id))
 
 @login_required(login_url='/login')
@@ -690,6 +852,13 @@ def view_request_reject(request, id=None):
     spacerequest.update_time  = datetime.datetime.now()
     spacerequest.save()
     
+    record_history(kind=HistoryEntry.SPACE_REQUEST_REJECTED,
+        note="Requested additional size: {0}MB".format(spacerequest.size_mb),
+        referenced_request=spacerequest,
+        referenced_project=spacerequest.project,
+        referenced_user_primary=request.user,
+    )
+    
     return redirect('/request/{}'.format(id))
 
 @login_required(login_url='/login')
@@ -698,7 +867,101 @@ def view_request_delete(request, id=None):
 
 @login_required(login_url='/login')
 def view_user_info(request, id=None):
-    pass
+    template = 'user_info.html'
+    context = {}
+    
+    user = None
+    
+    try:
+        user = User.objects.get(id=id)
+    except User.DoesNotExist:
+        return view_error(request, "User with ID {} does not exist.".format(id))
+    
+    context['user_first_name'] = user.first_name
+    context['user_last_name'] = user.last_name
+    context['user_id'] = user.id
+    context['user_date_joined'] = user.date_joined
+    
+    context['user_historyevents'] = []
+    historyentry_qs = HistoryEntry.objects.filter(
+        Q(referenced_user_primary=user) | Q(referenced_user_secondary=user)
+    ).order_by("-occurence_time")
+    for historyentry in historyentry_qs:
+        context['user_historyevents'].append({
+            'occurence_time': historyentry.occurence_time,
+            'kind': historyentry.get_kind_nice(),
+            'note': historyentry.note,
+            'referenced_project': historyentry.referenced_project,
+            'referenced_faculty': historyentry.referenced_faculty,
+            'referenced_request': historyentry.referenced_request,
+            'referenced_user_primary': historyentry.referenced_user_primary,
+            'referenced_user_secondary': historyentry.referenced_user_secondary,
+            'glyphicon': historyentry.get_kind_glyphicon(),
+            'label': (
+                    historyentry.referenced_request and "Request: "+historyentry.referenced_request.project.title
+                or  historyentry.referenced_project and "Project: "+historyentry.referenced_project.title
+                or  historyentry.referenced_faculty and "Faculty: "+historyentry.referenced_faculty.name
+                or  "—"
+            ),
+            'referenced_enum': (
+                    historyentry.referenced_request and "request"
+                or  historyentry.referenced_project and "project"
+                or  historyentry.referenced_faculty and "faculty"
+                or  "—"
+            ),
+            'referenced_id': (
+                    historyentry.referenced_request and historyentry.referenced_request.id
+                or  historyentry.referenced_project and historyentry.referenced_project.id
+                or  historyentry.referenced_faculty and historyentry.referenced_faculty.id
+                or  -1
+            ),
+        })
+    
+    project_membership_qs = ProjectMembership.objects.filter(member=user)
+    project_qs = Project.objects.filter(projectmembership__in=project_membership_qs).order_by("update_time")
+    
+    context['user_projects'] = []
+    for project in project_qs:
+        membership = project.get_membership(user)
+        context['user_projects'].append({
+            'id': project.id,
+            'title': project.title,
+            'update_time': project.update_time,
+            'faculty_id': project.faculty.id,
+            'faculty_name': project.faculty.name,
+            
+            'user_role': membership and membership.get_role_nice() or "—",
+        })
+    
+    faculty_membership_qs = FacultyMembership.objects.filter(member=user)
+    faculty_qs = Faculty.objects.filter(facultymembership__in=faculty_membership_qs).order_by("update_time")
+    
+    context['user_faculties'] = []
+    for faculty in faculty_qs:
+        membership = faculty.get_membership(user)
+        faculty_project_membership_qs = ProjectMembership.objects.filter(project__faculty=faculty, member=user)
+        
+        role_count_dict = {}
+        for project_membership in faculty_project_membership_qs:
+            role_count_dict[project_membership.get_role_nice()] = role_count_dict.get(project_membership.get_role_nice(), 0)+1
+        
+        role_list = [
+            {'name': "Faculty Manager"       , 'count': membership and membership.role == FacultyMembership.MANAGER  and -1 or 0},
+            {'name': "Faculty Approver"      , 'count': membership and membership.role == FacultyMembership.APPROVER and -1 or 0},
+            {'name': "Principal Investigator", 'count': role_count_dict.get("Principal Investigator", 0)},
+            {'name': "Data Manager"          , 'count': role_count_dict.get("Data Manager"          , 0)},
+            {'name': "Collaborator"          , 'count': role_count_dict.get("Collaborator"          , 0)},
+            {'name': "Researcher"            , 'count': role_count_dict.get("Researcher"            , 0)},
+        ]
+        
+        context['user_faculties'].append({
+            'id': faculty.id,
+            'name': faculty.name,
+            'update_time': faculty.update_time,
+            'role_list': role_list
+        })
+    
+    return render(request, template, context)
 
 @login_required(login_url='/login')
 def view_history(request, id=None):
