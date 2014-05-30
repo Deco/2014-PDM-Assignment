@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from core.models import *
 from core.forms import *
+from core.history import *
 from django.forms.models import modelformset_factory
 from django.views.generic import CreateView, UpdateView
 from django.db.models import Sum
@@ -121,6 +122,8 @@ def view_faculty_info(request, id=None):
     spacerequest_qs = SpaceRequest.objects.filter(project__faculty=faculty).order_by("-update_time")
     membership_qs = FacultyMembership.objects.filter(faculty=faculty).order_by("member__last_name")
     
+    faculty_curr_name = faculty.name
+    
     form = FacultyForm(form_method, instance=faculty)
     context['form'] = form
     
@@ -136,9 +139,27 @@ def view_faculty_info(request, id=None):
             return view_error(request, "You do not have permission to edit this faculty.")
         
         if form.is_valid() and membership_formset.is_valid():
+            print("aaa", faculty_curr_name)
+            
             faculty = form.save(commit=False)
+            
+            print("bbb", faculty.name)
+            change_str_parts = ["Changes: "]
+            if faculty_curr_name != faculty.name:
+                change_str_parts.append('Name changed from "{0}" to "{1}";'.format(faculty_curr_name, faculty.name))
+            else:
+                change_str_parts.append('None')
+            change_str = ' '.join(change_str_parts)
+            
             faculty.update_time = datetime.datetime.now()
             faculty.save()
+            
+            record_history(kind=HistoryEntry.FACULTY_EDITED,
+                note=change_str,
+                referenced_faculty=faculty,
+                referenced_user_primary=request.user
+            )
+            
             post_is_valid = True
             fillpermissions()
         else:
@@ -151,21 +172,28 @@ def view_faculty_info(request, id=None):
         membership = membership_form.instance
         member = (membership_form_i < membership_qs.count() and membership.member or None)
         
-        if post_is_valid:
-            if membership_form.has_changed():
-                if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
-                    print("BEFORE: ", membership_qs.count())
-                    membership_form.instance.delete()
-                    print("AFTER: ", membership_qs.count())
-                    membership_form_i += 1
-                    continue
+        if post_is_valid and membership_form.has_changed():
+            if membership_form.instance.pk and membership_form.cleaned_data['role'].strip() == '':
+                membership_form.instance.delete()
                 
-                membership = membership_form.save(commit=False)
-                membership.faculty = faculty
-                membership.save()
-                #objects_tosave_list.append(membership)
-        else:
-            post_is_valid = False
+                record_history(kind=HistoryEntry.FACULTY_MEMBER_REMOVED,
+                    referenced_faculty=faculty,
+                    referenced_user_primary=membership_form.instance.member,
+                    referenced_user_secondary=request.user
+                )
+                
+                membership_form_i += 1
+                continue
+            
+            membership = membership_form.save(commit=False)
+            membership.faculty = faculty
+            membership.save()
+            
+            record_history(kind=(member and HistoryEntry.FACULTY_MEMBER_CHANGED or HistoryEntry.FACULTY_MEMBER_ADDED),
+                referenced_faculty=faculty,
+                referenced_user_primary=membership.member,
+                referenced_user_secondary=request.user
+            )
         
         if member: 
             member_entry = {
@@ -248,6 +276,21 @@ def view_faculty_info(request, id=None):
     ]
     
     context['role_list'] = role_list
+    
+    context['faculty_historyevents'] = []
+    historyentry_qs = HistoryEntry.objects.filter(referenced_faculty=faculty).order_by("-occurence_time")
+    for historyentry in historyentry_qs:
+        context['faculty_historyevents'].append({
+            'occurence_time': historyentry.occurence_time,
+            'kind': historyentry.get_kind_nice(),
+            'note': historyentry.note,
+            'referenced_project': historyentry.referenced_project,
+            'referenced_faculty': historyentry.referenced_faculty,
+            'referenced_request': historyentry.referenced_request,
+            'referenced_user_primary': historyentry.referenced_user_primary,
+            'referenced_user_secondary': historyentry.referenced_user_secondary,
+            'glyphicon': historyentry.get_kind_glyphicon(),
+        })
     
     return render(request, template, context)
 

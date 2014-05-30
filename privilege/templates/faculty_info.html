@@ -283,7 +283,26 @@
         <div class="well list-well">
           <div class="tab-content">
             <div class="tab-pane active" id="history">
-                history
+              {% for historyevent in faculty_historyevents %}
+                <div class="listEntry list-group-item">
+                  <div class="row">
+                    <div class="listEntryTitle col-md-4">
+                      {{ historyevent.kind }}
+                    </div>
+                    <div class="listEntryDetail col-md-4">
+                      {{ historyevent.referenced_user_primary }}
+                    </div>
+                    <div class="listEntryDetail col-md-4">
+                      {{ historyevent.occurence_time }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="listEntryDetail col-md-12">
+                      {{ historyevent.note }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
             <div class="tab-pane" id="projectlist">
                 {% for project in faculty_projects %}

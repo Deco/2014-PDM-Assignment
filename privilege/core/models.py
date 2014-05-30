@@ -131,7 +131,7 @@ class SpaceRequest(models.Model):
     )
     
     project         = models.ForeignKey(Project, null=False)
-    size_mb          = models.PositiveIntegerField(null=False)
+    size_mb         = models.PositiveIntegerField(null=False)
     comment         = models.TextField(null=True, blank=True)
     status          = models.CharField(max_length=1, choices=STATUS, default=STATUS_PENDING)
     request_time    = models.DateTimeField(auto_now_add=True, blank=True)
@@ -147,20 +147,92 @@ class SpaceRequest(models.Model):
         return dict(self.STATUS).get(self.status, 'Unknown')
 
 class HistoryEntry(models.Model):
+    FACULTY_CREATED             = 101
+    FACULTY_EDITED              = 102
+    FACULTY_DELETED             = 103
+    FACULTY_MEMBER_ADDED        = 104
+    FACULTY_MEMBER_CHANGED      = 105
+    FACULTY_MEMBER_REMOVED      = 106
+    FACULTY_COMMENT_ADDED       = 107
+    PROJECT_CREATED             = 201
+    PROJECT_EDITED              = 202
+    PROJECT_DELETED             = 203
+    PROJECT_MEMBER_ADDED        = 204
+    PROJECT_MEMBER_CHANGED      = 205
+    PROJECT_MEMBER_REMOVED      = 206
+    PROJECT_COMMENT_ADDED       = 207
+    SPACE_REQUEST_CREATED       = 301
+    SPACE_REQUEST_EDITED        = 302
+    SPACE_REQUEST_DELETED       = 303
+    SPACE_REQUEST_ACTIVATED     = 304
+    SPACE_REQUEST_APPROVED      = 305
+    SPACE_REQUEST_REJECTED      = 306
+    SPACE_REQUEST_COMMENT_ADDED = 307
+    USER_CREATED                = 401
+    
     KIND = (
-        ('S', 'SPACE_REQUEST_CREATED'),
-        ('A', 'SPACE_REQUEST_APPROVED'),
-        ('C', 'SPACE_REQUEST_COMMENT'),
-        ('P', 'PROJECT_CREATED'),
-        ('M', 'MEMBER_CREATED'),
-        ('J', 'MEMBER_JOINED'),
+        (FACULTY_CREATED            , 'Faculty created'),
+        (FACULTY_EDITED             , 'Faculty edited'),
+        (FACULTY_DELETED            , 'Faculty deleted'),
+        (FACULTY_MEMBER_ADDED       , 'Faculty member added'),
+        (FACULTY_MEMBER_CHANGED     , 'Faculty member changed'),
+        (FACULTY_MEMBER_REMOVED     , 'Faculty member removed'),
+        (FACULTY_COMMENT_ADDED      , 'Faculty comment added'),
+        (PROJECT_CREATED            , 'Project created'),
+        (PROJECT_EDITED             , 'Project edited'),
+        (PROJECT_DELETED            , 'Project deleted'),
+        (PROJECT_MEMBER_ADDED       , 'Project member added'),
+        (PROJECT_MEMBER_CHANGED     , 'Project member changed'),
+        (PROJECT_MEMBER_REMOVED     , 'Project member removed'),
+        (PROJECT_COMMENT_ADDED      , 'Project comment added'),
+        (SPACE_REQUEST_CREATED      , 'Space request created'),
+        (SPACE_REQUEST_EDITED       , 'Space request edited'),
+        (SPACE_REQUEST_DELETED      , 'Space request deleted'),
+        (SPACE_REQUEST_ACTIVATED    , 'Space request activated'),
+        (SPACE_REQUEST_APPROVED     , 'Space request approved'),
+        (SPACE_REQUEST_REJECTED     , 'Space request rejected'),
+        (SPACE_REQUEST_COMMENT_ADDED, 'Space request comment added'),
+        (USER_CREATED               , 'User created'),
     )
+    
+    KIND_GLYPHICON = {} # lol, why not
+    #KIND_GLYPHICON[FACULTY_CREATED            ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_EDITED             ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_DELETED            ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_MEMBER_ADDED       ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_MEMBER_CHANGED     ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_MEMBER_REMOVED     ] = "th-list"
+    #KIND_GLYPHICON[FACULTY_COMMENT_ADDED      ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_CREATED            ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_EDITED             ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_DELETED            ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_MEMBER_ADDED       ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_MEMBER_CHANGED     ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_MEMBER_REMOVED     ] = "th-list"
+    #KIND_GLYPHICON[PROJECT_COMMENT_ADDED      ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_CREATED      ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_EDITED       ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_DELETED      ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_ACTIVATED    ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_APPROVED     ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_REJECTED     ] = "th-list"
+    #KIND_GLYPHICON[SPACE_REQUEST_COMMENT_ADDED] = "th-list"
+    #KIND_GLYPHICON[USER_CREATED               ] = "th-list"
+    
     # These will serve as notifications, too
     # To relevency of a HistoryEntry to a user is determined by their membership to the referenced object
     
     occurence_time              = models.DateTimeField(auto_now_add=True)
+    kind                        = models.IntegerField(choices=KIND)
+    note                        = models.TextField(null=True, blank=True)
     referenced_project          = models.ForeignKey(Project, null=True)
     referenced_faculty          = models.ForeignKey(Faculty, null=True)
     referenced_request          = models.ForeignKey(SpaceRequest, null=True)
-    referenced_member_primary   = models.ForeignKey(User, null=True, related_name='historyentry_referedto_primary_set')
-    referenced_member_secondary = models.ForeignKey(User, null=True, related_name='historyentry_referedto_secondary_set')
+    referenced_user_primary     = models.ForeignKey(User, null=True, related_name='historyentry_referedto_primary_set')
+    referenced_user_secondary   = models.ForeignKey(User, null=True, related_name='historyentry_referedto_secondary_set')
+    
+    def get_kind_nice(self):
+        return dict(self.KIND).get(self.kind, 'Unknown')
+        
+    def get_kind_glyphicon(self):
+        return self.KIND_GLYPHICON.get(self.kind, 'euro')
