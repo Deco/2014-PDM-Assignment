@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from core.models import *
+from core.history import *
 import random
 from django.db import transaction
 
@@ -9,6 +10,7 @@ class Command(BaseCommand):
     help = 'stuff'
     
     def _fill_db(self):
+        print "Filling database..."
         with transaction.commit_on_success():
             #userChoices.shuffle()
             random.shuffle(self.facultyChoices)
@@ -18,50 +20,65 @@ class Command(BaseCommand):
             userCount = len(self.userChoices)
             for userI in range(userCount):
                 choice = self.userChoices[userI]
-                userList.append(
-                    self._make_user(str(userI+1), choice[0], choice[1], choice[2], (userCount == 0))
+                user = self._make_user(str(userI+1), choice[0], choice[1], choice[2], (userI == 0), choice[3])
+                userList.append(user)
+                record_history(kind=HistoryEntry.USER_CREATED,
+                    note="Created with staff ID: {0}".format(userI+1),
+                    referenced_user_primary=userList[0],
+                    referenced_user_secondary=user
                 )
             
             print(userList)
             
             facultyList = []
-            facultyCount = 8 #len(self.facultyChoices)
-            projectsPerFacultyCount = 7
-            for facultyI in range(facultyCount):
-                randomUsers = random.sample(userList, random.randrange(5, 15))
+            while len(self.projectChoices) > 0 and len(self.facultyChoices) > 0:
+                randomUsers = random.sample(userList, random.randrange(5, 15+1))
                 faculty = self._make_faculty(
-                    self.facultyChoices[facultyI],
+                    self.facultyChoices.pop(),
                     zip(randomUsers, ['M', 'A', 'A', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M', 'A', 'A', 'M'])
                 )
                 facultyList.append(faculty)
                 
-                for projectI in range(projectsPerFacultyCount):
+                projectCount = random.randrange(min(6, len(self.projectChoices)), min(11, len(self.projectChoices))+1)
+                for projectI in range(projectCount):
                     randomUsers = random.sample(userList, random.randrange(8, 25))
                     self._make_project(
-                        self.projectChoices.pop(), #title
+                        self.projectChoices.pop(),
                         faculty,
                         zip(randomUsers, ['P','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M'])
                     )
     
-    def _make_user(self, username, first_name, last_name, password, is_admin):
+    def _make_user(self, username, first_name, last_name, password, is_admin, email):
         print(username, first_name, last_name, password)
         return self._make(User,
             username=username,
             first_name=first_name, last_name=last_name,
             password=make_password(password),
-            is_staff=is_admin, is_superuser=is_admin
+            is_staff=is_admin, is_superuser=is_admin,
+            email = email
         )
     
     def _make_faculty(self, name, members):
         faculty = self._make(Faculty,
             name=name
         )
+        record_history(kind=HistoryEntry.FACULTY_CREATED,
+            note='Name: "{0}"'.format(name),
+            referenced_faculty=faculty,
+            referenced_user_primary=members[0][0],
+        )
         for pair in members:
             print("wtf", pair[0], pair[1])
-            self._make(FacultyMembership,
+            membership = self._make(FacultyMembership,
                 faculty=faculty,
                 member=pair[0],
                 role=pair[1]
+            )
+            record_history(kind=HistoryEntry.FACULTY_MEMBER_ADDED,
+                note='User "{0}" added as "{1}".'.format(membership.member, membership.get_role_nice()),
+                referenced_faculty=faculty,
+                referenced_user_primary=members[0][0],
+                referenced_user_secondary=pair[0]
             )
         return faculty
     
@@ -74,12 +91,37 @@ class Command(BaseCommand):
             storage_capacity_mb=capacity,
             storage_used_mb=random.randrange(0,capacity,1),
         )
+        creator = FacultyMembership.objects.filter(faculty=faculty,role='M').order_by('?')[0].member
+        record_history(kind=HistoryEntry.PROJECT_CREATED,
+            note='Project created in faculty "{0}"'.format(faculty.name),
+            referenced_faculty=faculty,
+            referenced_project=project,
+            referenced_user_primary=creator
+        )
+        is_first = True
         for pair in members:
-            self._make(ProjectMembership,
+            membership = self._make(ProjectMembership,
                 project=project,
                 member=pair[0],
                 role=pair[1]
             )
+            adder = (
+                    is_first and creator
+                or  ProjectMembership.objects.filter(project=project,role__in=['P','M']).order_by('?')[0].member
+            )
+            is_first = False
+            record_history(kind=HistoryEntry.PROJECT_MEMBER_ADDED,
+                note='User "{0}" added as "{1}".'.format(membership.member, membership.get_role_nice()),
+                referenced_project=project,
+                referenced_user_primary=adder,
+                referenced_user_secondary=pair[0],
+            )
+        
+        record_history(kind=HistoryEntry.PROJECT_EDITED,
+            note='Changes: Title changed to "{0}";'.format(project.title),
+            referenced_project=project,
+            referenced_user_primary=creator,
+        )
         return project
     
     def _make(self, kind, *args, **kwargs):
@@ -91,7 +133,7 @@ class Command(BaseCommand):
         self._fill_db()
     
     userChoices = [
-        ('Cornelius', 'Chase', 'password'),
+        ('Cornelius', 'Chase', 'password', 'deco.da.man@gmail.com'),
         ('Dee', 'Doss', 'h4cker'),
         ('Mary', 'Poppins', 'penguins!'),
         ('Edward', 'Von Hamburger', 'aka jake'),
@@ -291,4 +333,56 @@ class Command(BaseCommand):
         'Parachute use to prevent death and major trauma related to gravitational challenge: systematic review of randomised controlled trials',
         'Consequences of Erudite Vernacular Utilized Irrespective of Necessity: Problems with Using Long Words Needlessly',
         'What is meow',
+        'President Kennedy\'s death: A poison arrow-assisted homicide.',
+        'Double feature: Personalities of punks and perils of their pointy parkas.',
+        'Finally, a male contraceptive: behold the ball cozy!',
+        'Bad news: you have a tumor. Good news: it\'s really cute!',
+        'Times New Roman may be funnier than Arial, but why does Comic Sans make me want to kill myself?',
+        'Nasal leech infestation: report of seven leeches and literature review.',
+        'Did Gollum have schizophrenia or multiple personality disorder?',
+        'Scientific analysis of Playboy centerfolds reveals Barbie-like vulvas.',
+        'That\'s one miraculous conception.',
+        'The Mere Anticipation of an Interaction with a Woman Can Impair Men\'s Cognitive Performance.',
+        'Why overheard cell phone conversations are extra annoying.',
+        'Cutting off the nose to save the penis.',
+        'A scientific analysis of 400 YouTube videos of dogs chasing their tails.',
+        'What did God do with Adam\'s penis bone?',
+        'This study is soooo interesting.',
+        'An unusual finding during screening colonoscopy: a cockroach!',
+        'Mating competitors increase religious beliefs.',
+        'A novel method for the removal of ear cerumen.',
+        'Have a difficult problem to solve? Try vodka.',
+        'That\'s one miraculous conception.',
+        'An autopsy of chicken nuggets.',
+        'Regardless of bladder size, all mammals pee for approximately 21 seconds.',
+        'People prefer mates with a 22% resemblance to themselves.',
+        'Foot orgasm syndrome. Yup, it\'s a thing.',
+        'Trypophobia: fear of holes.',
+        'Ever wanted to know what\'s really in hotdogs?',
+        'Women\'s preference for male body hair changes across the menstrual cycle.',
+        'Study proves "old person smell" is real.',
+        'Does Guinness really taste better in Ireland? Science weighs in.',
+        'Chemists explain why it\'s so hard to lift a wet glass from a table.',
+        'Study finds that watching 3D movies makes 54.8% of people want to vomit.',
+        'Mantis Shrimp\'s Bizarre Eyesight Finally Figured Out',
+        'Why is butter sooooo delicious?',
+        'Pleasure and pain: the effect of (almost) having an orgasm on genital and nongenital sensitivity.',
+        'When the mafia does science.',
+        'Visual cues given by humans are not sufficient for Asian Elephants (Elephas maximus) to find hidden food.',
+        'Blow as well as pull: an innovative technique for dealing with a rectal foreign body.',
+        'Phase 1: Build an army of remote-controlled turtles. Phase 2: ? Phase 3: Take over the world!',
+        'Cunnilingus increases duration of copulation in the Indian flying fox.',
+        'Powerful people are bigger hypocrites.',
+        'If you feel like you can\'t work due to a hangover, you\'re probably right.',
+        'Presenting the Meatball-French fries-Meatball-French fries-Meatball-French fries-Cream-Brownie-Cream-Brownie-Cream-Brownie diet!',
+        '\'Beauty is in the eye of the beer holder\': People who think they are drunk also think they are attractive.',
+        '20% of people who turn to the internet for sexual fulfillment leave dissatisfied.',
+        'Is there a gene for self-employment?',
+        'Left-handed people avoid using exact numbers.',
+        'How long does roadkill linger on the pavement?',
+        'Laughing rats are optimistic.',
+        'The science of chick fights.',
+        'Chimps in glasses...for science!',
+        'Dying with laughter...literally.',
+        'Dung beetles use the Milky Way for orientation.',
     ]

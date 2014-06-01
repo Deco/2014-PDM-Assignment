@@ -3,12 +3,13 @@ from django.contrib.auth.models import User
 from django.contrib import admin
 
 
+User.url_type = "user"
 def user_unicode(self):
     return  u'%s %s' % (self.first_name, self.last_name)
-
 User.__unicode__ = user_unicode
 
 class Faculty(models.Model):
+    url_type = "faculty"
     name    = models.CharField(max_length=1024, null=False)
     members = models.ManyToManyField(User, through='core.FacultyMembership')
     update_time = models.DateTimeField(auto_now_add=True, blank=True)
@@ -60,6 +61,7 @@ class FacultyMembership(models.Model):
 
 
 class Project(models.Model):
+    url_type = "project"
     title  = models.CharField(max_length=1024, null=False)
     faculty = models.ForeignKey(Faculty, null=False)
     storage_capacity_mb = models.PositiveIntegerField(default=0)
@@ -118,6 +120,7 @@ class ProjectMembership(models.Model):
         return dict(self.PROJECT_ROLES).get(self.role, 'Unknown')
 
 class SpaceRequest(models.Model):
+    url_type = "request"
     STATUS_INACTIVE = 'I'
     STATUS_PENDING = 'P'
     STATUS_APPROVED = 'A'

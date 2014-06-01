@@ -1,0 +1,59 @@
+{% load staticfiles %}
+{% load comments %}
+
+{% get_comment_list for comment_object as comment_list %}
+{% for comment in comment_list %}
+  <div class="listEntry list-group-item bubble">
+    <a name="c{{ comment.id }}"></a>
+    <div class="row borderbottom">
+      <div class="col-xs-1">
+        <img class="comment-avatar" src="{% static 'user.gif' %}"/>
+      </div>
+      <div class="col-xs-7 listEntryTitle">
+        <a href="/user/{{ comment.user.id }}">{{ comment.user }}</a>
+      </div>
+      <div class="col-xs-4">
+        <!--<a href="{% get_comment_permalink comment %}">{{ comment.submit_date }}</a>-->
+        {{ comment.submit_date }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="listEntryDetail col-xs-12">
+        <span>{{ comment.comment }}</span>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% get_comment_form for comment_object as comment_form %}
+<form action="{% comment_form_target %}" method="POST">{% csrf_token %}
+  <div class="listEntry list-group-item bubble comment-form">
+    <a name="c{{ comment.id }}"></a>
+    <div class="row borderbottom">
+      <div class="col-xs-1">
+        <img class="comment-avatar" src="{% static 'user.gif' %}"/>
+      </div>
+      <div class="col-xs-7 listEntryTitle">
+        {{ user.first_name }} {{ user.last_name }}
+      </div>
+      <div class="col-xs-4">
+        &#x2014;
+      </div>
+    </div>
+    <div class="row">
+      <div class="listEntryDetail col-xs-12">
+        <span>{{ comment_form.comment }}</span>
+        <div style="display: none;">{{ comment_form.honeypot }}</div>
+        {{ comment_form.content_type }}
+        {{ comment_form.object_pk }}
+        {{ comment_form.timestamp }}
+        {{ comment_form.security_hash }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="listEntryDetail col-xs-12">
+        <input type="hidden" name="next" value="/{{ comment_object.url_type }}/{{ comment_object.id }}#comments" />
+        <input type="submit" value="Submit comment" id="id_submit" />
+      </div>
+    </div>
+  </div>
+</form>

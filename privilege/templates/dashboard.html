@@ -8,9 +8,74 @@
 {% endblock %}
 
 {% block 'body' %}
-  <div class="col-md-5 content-col dashboard-left-column">
+  <div class="col-md-6 content-col dashboard-left-column">
     <div class="dashboard-div">
-      <h1>Notifications</h1>
+      <ul class="nav nav-tabs">
+        <li class="info-tab-header active">
+          <a href="#myfaculties" data-toggle="tab"><span class="glyphicon glyphicon-bookmark dashboard-icon"></span>My Faculties</a>
+        </li>
+        <li class="info-tab-header">
+          <a href="#myprojects" data-toggle="tab"><span class="glyphicon glyphicon-list dashboard-icon"></span>My Projects</a>
+        </li>
+      </ul>
+      <div class="well list-well">
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="myfaculties">
+            <div id="faculty-box" class="">
+              {% for faculty in faculties %}
+                <div class="list-group-item listEntry bubble">
+                  <div class="listEntryTitle">
+                    <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
+                  </div>
+                  <span class="listEntryDetail">
+                    {% for role in faculty.role_list %}
+                      {% if role.count != 0 %}
+                        <span>
+                          {% if role.count > 0 %}
+                            {{ role.name }}&nbsp;<span>({{ role.count }});</span>
+                          {% else %}
+                            {{ role.name }};
+                          {% endif %}
+                        </span>
+                      {% endif %}
+                    {% endfor %}
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="tab-pane fade" id="myprojects">
+            <div id="project-box" class="">
+              {% for project in projects %}
+                <div class="listEntry list-group-item bubble">
+                  <div class="row">
+                    <div class="listEntryTitle col-md-12">
+                      <a href="/project/{{ project.id }}">{{ project.title }}</a>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="listEntryDetail col-md-9 dashboard-project-faculty">
+                      <a href="/faculty/{{ project.faculty_id }}">{{ project.faculty_name }}</a>
+                    </div>
+                    <div class="listEntryDetail col-md-3 dashboard-project-role">
+                      {{ project.user_role }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 content-col">
+    <div class="dashboard-div">
+      <ul class="nav nav-tabs">
+        <li class="info-tab-header active">
+          <a href="#" data-toggle="tab"><span class="glyphicon glyphicon-dashboard dashboard-icon"></span>Notifications</a>
+        </li>
+      </ul>
       <div class="well list-well">
         <div id="notification-box" class="listBox">
           {% if historyevents|length == 0 %}
@@ -19,74 +84,7 @@
             </div>
           {% endif %}
           {% for historyevent in historyevents %}
-            <div class="listEntry list-group-item">
-              <div class="row">
-                <div class="listEntryTitle col-md-6">
-                  {{ historyevent.kind }}
-                </div>
-                <div class="listEntryDetail col-md-6">
-                  {{ historyevent.occurence_time|localtime }}
-                </div>
-              </div>
-              <div class="row">
-                <div class="listEntryDetail col-md-12">
-                  {{ historyevent.note }}
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-    <div class="dashboard-div">
-      <h1>My Faculties</h1>
-      <div class="well list-well">
-        <div id="faculty-box" class="">
-          {% for faculty in faculties %}
-            <div class="list-group-item listEntry">
-              <div class="listEntryTitle">
-                <a href="/faculty/{{ faculty.id }}">{{ faculty.name }}</a>
-              </div>
-              <span class="listEntryDetail">
-                {% for role in faculty.role_list %}
-                  {% if role.count != 0 %}
-                    <span>
-                      {% if role.count > 0 %}
-                        {{ role.name }}&nbsp;<span>({{ role.count }});</span>
-                      {% else %}
-                        {{ role.name }};
-                      {% endif %}
-                    </span>
-                  {% endif %}
-                {% endfor %}
-              </span>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-7 content-col">
-    <div class="dashboard-div">
-      <h1>My Projects</h1>
-      <div class="well list-well">
-        <div id="project-box" class="">
-          {% for project in projects %}
-            <div class="listEntry list-group-item">
-              <div class="row">
-                <div class="listEntryTitle col-md-12">
-                  <a href="/project/{{ project.id }}">{{ project.title }}</a>
-                </div>
-              </div>
-              <div class="row">
-                <div class="listEntryDetail col-md-9 dashboard-project-faculty">
-                  {% include "cards/faculty.html" with faculty=project.faculty cardType="label" %}
-                </div>
-                <div class="listEntryDetail col-md-3 dashboard-project-role">
-                  {{ project.user_role }}
-                </div>
-              </div>
-            </div>
+            {% include "cards/historyentry.html" %}
           {% endfor %}
         </div>
       </div>

@@ -17,6 +17,8 @@ urlpatterns = patterns(
     
     url(r'^dashboard$', view_dashboard, name='dashboard'),
     
+    url(r'^account', view_privilege, name='account'),
+    
     url(r'^faculty/list$', view_faculty_list, name='faculty_list'),
     #url(r'^faculty/create$', view_faculty_form, name='faculty_create'),
     url(r'^faculty/(?P<id>\d+)$', view_faculty_info, name='faculty_info'),

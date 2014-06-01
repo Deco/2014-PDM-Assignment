@@ -1,0 +1,27 @@
+{% extends "common.html" %}
+{% load staticfiles %}
+
+{% block 'head' %}
+  <link href="{% static 'css/test.css' %}" rel="stylesheet" type="text/css">
+  <script src="{% static 'js/test.js' %}"></script><head>
+{% endblock %}
+
+{% block 'breadcrumb' %}
+  <span class="crumb-sep">&gt;</span>
+  <span class="crumb-part">Privilege</span>
+{% endblock %}
+
+{% block 'body' %}
+  <center>
+    <div id="content">
+      <img id="logo" src="{% static "logo.png" %}" alt="logo"></img>
+    </div>
+  </center>
+  
+  <div id="django-logo">
+    <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangopowered126x54.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a>
+    <img src="{% static 'unchained.png' %}" border="0"/>
+  </div>
+  
+  <script src="{% static "test.js" %}"></script>
+{% endblock %}

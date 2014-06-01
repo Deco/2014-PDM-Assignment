@@ -1,0 +1,18 @@
+
+Hello,
+
+Please be notified of the following event:
+
+-------------------------------------------------
+{{ kind }}: {{ label }}
+(by {{ referenced_user_primary }} on {{ occurence_time }})
+{{ note }}
+-------------------------------------------------
+
+You can find out more information by visiting the following link:
+http://teamprivileged.com/{{ referenced_enum }}/{{ referenced_id }}
+
+Regards,
+Blackbox.
+
+~~~ CuRtIn UnIvErSiTy Of TeChNoLoGy ~~~

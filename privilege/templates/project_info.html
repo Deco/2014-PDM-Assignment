@@ -22,7 +22,7 @@
           <ul class="list-group">
            {% if form.non_field_errors %}
              {% for error in form.non_field_errors %}
-               <li class="list-group-item">
+               <li class="list-group-item bubble">
                  <strong>&#x2014;</strong>: {{ error }}
                </li>
              {% endfor %}
@@ -30,27 +30,27 @@
            {% for field in form %}
              {% if field.errors %}
                {% for error in field.errors %}
-                 <li class="list-group-item">
+                 <li class="list-group-item bubble">
                    <strong>{{ field.label }}</strong>: {{ error }}
                  </li>
                {% endfor %}
              {% endif %}
            {% endfor %}
            {% for error in membership_formset.non_field_errors %}
-             <li class="list-group-item">
+             <li class="list-group-item bubble">
                <strong>&#x2014;</strong>: {{ error }}
              </li>
            {% endfor %}
            {% for form in membership_formset %}
              {% for error in form.non_field_errors %}
-               <li class="list-group-item">
+               <li class="list-group-item bubble">
                  {{ error }}
                </li>
              {% endfor %}
              {% for field in form %}
                {% if field.errors %}
                   {% for error in field.errors %}
-                    <li class="list-group-item">
+                    <li class="list-group-item bubble">
                       <strong>{{ field.label }}</strong>: {{ error }}
                     </li>
                   {% endfor %}
@@ -157,11 +157,11 @@
         </ul>
         <div class="well list-well">
           <div class="tab-content">
-            <div class="tab-pane active" id="members">
+            <div class="tab-pane fade in active" id="members">
               <div id="faculty-box" class="listBox">
                 {{ membership_formset.management_form }}
                 {% for member_info in project_members %}
-                  <div class="listEntry list-group-item">
+                  <div class="listEntry list-group-item bubble">
                     <span class="listEntryTitle">
                       <div>
                         <a href="/user/{{ member_info.id }}">{{ member_info.first_name }} {{ member_info.last_name }}</a>
@@ -183,7 +183,7 @@
                 {% endfor %}
               </div>
             </div>
-            <div class="tab-pane" id="requests">
+            <div class="tab-pane fade" id="requests">
               <div id="faculty-box" class="listBox">
                 {% if project_spacerequests|length == 0 %}
                   <div class="notification-absence-text">
@@ -191,7 +191,7 @@
                   </div>
                 {% endif %}
                 {% for spacerequest in project_spacerequests %}
-                  <div class="listEntry list-group-item">
+                  <div class="listEntry list-group-item bubble">
                     <span class="listEntryTitle">
                       <div class="row">
                         <div class="col-md-7">
@@ -221,78 +221,38 @@
         </div>
       </div>
     </div>
-    <div class="col-md-7">
-      <div class="dashboard-div">
-        <ul class="nav nav-tabs">
-          <li class="active info-tab-header">
-            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
-          </li>
-          <li class="info-tab-header">
-            <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
-          </li>
-        </ul>
-        <div class="well list-well">
-          <div class="tab-content">
-            <div class="tab-pane active" id="history">
-              {% for historyevent in project_historyevents %}
-                <div class="listEntry list-group-item">
-                  <div class="row">
-                    <div class="col-xs-1 history-icon">
-                      <span class="glyphicon glyphicon-{{ historyevent.glyphicon }}"></span>
-                    </div>
-                    <div class="col-xs-11">
-                      <div class="row">
-                        <div class="listEntryTitle col-xs-4">
-                          {{ historyevent.kind }}
-                        </div>
-                        <div class="listEntryDetail col-xs-4">
-                          {{ historyevent.referenced_user_primary }}
-                        </div>
-                        <div class="listEntryDetail col-xs-4">
-                          {{ historyevent.occurence_time }}
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="listEntryDetail col-xs-12">
-                          {{ historyevent.note }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-            <div class="tab-pane" id="comments">
-              {% load comments %}
-              {% get_comment_list for comment_object as comment_list %}
-              {% for comment in comment_list %}
-                <a name="c{{ comment.id }}"></a>
-                <a href="{% get_comment_permalink comment %}">
-                  permalink for comment #{{ forloop.counter }}
-                </a>
-              {% endfor %}
-              <div class="comment-form">
-                {% get_comment_form for comment_object as comment_form %}
-                <form action="{% comment_form_target %}" method="POST">
-                  <div>{{ comment_form.comment }}</div>
-                  <div>{{ comment_form.honeypot }}</div>
-                  <div>{{ comment_form.content_type }}</div>
-                  <div>{{ comment_form.object_pk }}</div>
-                  <div>{{ comment_form.timestamp }}</div>
-                  <div>{{ comment_form.security_hash }}</div>
-                  <div><input type="hidden" name="next" value="/project/{{ project_id }}#comments" /></div>
-                  <div><button id="comment-submit" /></div>
-                </form>
+  </form>
+  <div class="col-md-7">
+    <div class="dashboard-div">
+      <ul class="nav nav-tabs">
+        <li class="active info-tab-header">
+          <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
+        </li>
+        <li class="info-tab-header">
+          <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
+        </li>
+      </ul>
+      <div class="well list-well">
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="history">
+            {% if project_historyevents|length == 0 %}
+              <div class="notification-absence-text">
+                There is no history.
               </div>
-            </div>
+            {% endif %}
+            {% for historyevent in project_historyevents %}
+              {% include "cards/historyentry.html" %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane fade" id="comments">
+            {% include "cards/comments.html" %}
           </div>
         </div>
       </div>
     </div>
-  </form>
+  </div>
   <script>
     $(document).ready(function(){
-        
         function showEdit() {
             $(".project-info-only").hide();
             $(".project-edit-only").show();

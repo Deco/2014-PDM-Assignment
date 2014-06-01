@@ -12,6 +12,7 @@ from core.history import *
 from django.forms.models import modelformset_factory
 from django.views.generic import CreateView, UpdateView
 from django.db.models import Sum, Q
+import core.comments
 
 @login_required(login_url='/login')
 def view_dashboard(request):
@@ -70,25 +71,15 @@ def view_dashboard(request):
             'user_role': membership and membership.get_role_nice() or 'blah',
         })
     
-    context['historyevents'] = []
-    historyentry_qs = HistoryEntry.objects.filter(
-            Q(referenced_project__in=projects_qs)
-        |   Q(referenced_faculty__in=faculties_qs)
-        |   Q(referenced_user_primary =request.user)
-        |   Q(referenced_user_secondary=request.user)
-    ).order_by("-occurence_time")
-    for historyentry in historyentry_qs:
-        context['historyevents'].append({
-            'occurence_time': historyentry.occurence_time,
-            'kind': historyentry.get_kind_nice(),
-            'note': historyentry.note,
-            'referenced_project': historyentry.referenced_project,
-            'referenced_faculty': historyentry.referenced_faculty,
-            'referenced_request': historyentry.referenced_request,
-            'referenced_user_primary': historyentry.referenced_user_primary,
-            'referenced_user_secondary': historyentry.referenced_user_secondary,
-            'glyphicon': historyentry.get_kind_glyphicon(),
-        })
+    context['historyevents'] = find_history(
+        HistoryEntry.objects.filter(
+                Q(referenced_project__in=projects_qs)
+            |   Q(referenced_faculty__in=faculties_qs)
+            |   Q(referenced_user_primary =request.user)
+            |   Q(referenced_user_secondary=request.user)
+        ).order_by("-occurence_time")[:50],
+        None
+    )
     
     return render(request, template, context)
 
@@ -163,7 +154,7 @@ def view_faculty_info(request, id=None):
             
             change_str_parts = ["Changes: "]
             if faculty_curr_name != faculty.name:
-                change_str_parts.append('Name changed from "{0}" to "{1}";'.format(faculty_curr_name, faculty.name))
+                change_str_parts.append('Name changed to "{0}";'.format(faculty.name))
             else:
                 change_str_parts.append('None')
             change_str = ' '.join(change_str_parts)
@@ -302,26 +293,18 @@ def view_faculty_info(request, id=None):
     
     context['role_list'] = role_list
     
-    context['faculty_historyevents'] = []
-    historyentry_qs = HistoryEntry.objects.filter(referenced_faculty=faculty).order_by("-occurence_time")
-    for historyentry in historyentry_qs:
-        context['faculty_historyevents'].append({
-            'occurence_time': historyentry.occurence_time,
-            'kind': historyentry.get_kind_nice(),
-            'note': historyentry.note,
-            'referenced_project': historyentry.referenced_project,
-            'referenced_faculty': historyentry.referenced_faculty,
-            'referenced_request': historyentry.referenced_request,
-            'referenced_user_primary': historyentry.referenced_user_primary,
-            'referenced_user_secondary': historyentry.referenced_user_secondary,
-            'glyphicon': historyentry.get_kind_glyphicon(),
-        })
+    context['faculty_historyevents'] = find_history(
+        HistoryEntry.objects.filter(referenced_faculty=faculty).order_by("-occurence_time"),
+        faculty
+    )
+    
+    context['comment_object'] = faculty
     
     return render(request, template, context)
 
 @login_required(login_url='/login')
 def view_faculty_delete(request, id=None):
-    pass
+    return view_privilege(request)
 
 @login_required(login_url='/login')
 def view_faculty_create_project(request, id=None):
@@ -440,7 +423,7 @@ def view_project_info(request, id=None):
             
             change_str_parts = ["Changes: "]
             if project_curr_title != project.title:
-                change_str_parts.append('Title changed from "{0}" to "{1}";'.format(project_curr_title, project.title))
+                change_str_parts.append('Title changed to "{0}";'.format(project.title))
             if project_curr_faculty != project.faculty:
                 change_str_parts.append('Faculty changed from "{0}" to "{1}";'.format(project_curr_faculty.id, project.faculty.id))
             if len(change_str_parts) == 1:
@@ -553,20 +536,10 @@ def view_project_info(request, id=None):
             'update_time': project.update_time,
         })
     
-    context['project_historyevents'] = []
-    historyentry_qs = HistoryEntry.objects.filter(referenced_project=project).order_by("-occurence_time")
-    for historyentry in historyentry_qs:
-        context['project_historyevents'].append({
-            'occurence_time': historyentry.occurence_time,
-            'kind': historyentry.get_kind_nice(),
-            'note': historyentry.note,
-            'referenced_project': historyentry.referenced_project,
-            'referenced_faculty': historyentry.referenced_faculty,
-            'referenced_request': historyentry.referenced_request,
-            'referenced_user_primary': historyentry.referenced_user_primary,
-            'referenced_user_secondary': historyentry.referenced_user_secondary,
-            'glyphicon': historyentry.get_kind_glyphicon(),
-        })
+    context['project_historyevents'] = find_history(
+        HistoryEntry.objects.filter(referenced_project=project).order_by("-occurence_time"),
+        project
+    )
     
     context['comment_object'] = project
     
@@ -574,7 +547,7 @@ def view_project_info(request, id=None):
 
 @login_required(login_url='/login')
 def view_project_delete(request, id=None):
-    pass
+    return view_privilege(request)
 
 @login_required(login_url='/login')
 def view_project_create_request(request, id=None):
@@ -680,7 +653,7 @@ def view_request_info(request, id=None):
             
             change_str_parts = ["Changes: "]
             if spacerequest_curr_size_mb != spacerequest.size_mb:
-                change_str_parts.append('Requested size addition changed from {0}MB to {1}MB;'.format(spacerequest_curr_size_mb, spacerequest.size_mb))
+                change_str_parts.append('Requested size addition changed to {0}MB;'.format(spacerequest.size_mb))
             if len(change_str_parts) == 1:
                 change_str_parts.append('None')
             change_str = ' '.join(change_str_parts)
@@ -692,6 +665,17 @@ def view_request_info(request, id=None):
                 note=change_str,
                 referenced_request=spacerequest,
                 referenced_user_primary=request.user,
+                email_qs=User.objects.filter(
+                        Q(projectmembership__project=spacerequest.project        , projectmembership__role__in=[ProjectMembership.PRINCIPALINVESTIGATOR,ProjectMembership.DATAMANAGER])
+                    |   Q(facultymembership__faculty=spacerequest.project.faculty, facultymembership__role__in=[FacultyMembership.MANAGER,FacultyMembership.APPROVER])
+                ).distinct(),
+                # User is a member of spacerequest.project with role in [PRINCIPALINVESTIGATOR, DATAMANAGER]
+                # OR
+                # User is a member of spacerequest.project.faculty with role in [MANAGER, APPROVER]
+                
+                #User.objects.filter(
+                #    Q(that complicated thing) & ~Q(id=request.user.id)
+                #)
             )
             
             context['spacerequest_form_commited'] = True
@@ -720,20 +704,12 @@ def view_request_info(request, id=None):
     context['project_storage_used_mb'] = project.storage_used_mb
     context['project_storage_capacity_mb'] = project.storage_capacity_mb
     
-    context['spacerequest_historyevents'] = []
-    historyentry_qs = HistoryEntry.objects.filter(referenced_request=spacerequest).order_by("-occurence_time")
-    for historyentry in historyentry_qs:
-        context['spacerequest_historyevents'].append({
-            'occurence_time': historyentry.occurence_time,
-            'kind': historyentry.get_kind_nice(),
-            'note': historyentry.note,
-            'referenced_project': historyentry.referenced_project,
-            'referenced_faculty': historyentry.referenced_faculty,
-            'referenced_request': historyentry.referenced_request,
-            'referenced_user_primary': historyentry.referenced_user_primary,
-            'referenced_user_secondary': historyentry.referenced_user_secondary,
-            'glyphicon': historyentry.get_kind_glyphicon(),
-        })
+    context['spacerequest_historyevents'] = find_history(
+        HistoryEntry.objects.filter(referenced_request=spacerequest).order_by("-occurence_time"),
+        spacerequest
+    )
+    
+    context['comment_object'] = spacerequest
     
     return render(request, template, context)
 
@@ -863,7 +839,7 @@ def view_request_reject(request, id=None):
 
 @login_required(login_url='/login')
 def view_request_delete(request, id=None):
-    pass
+    return view_privilege(request)
 
 @login_required(login_url='/login')
 def view_user_info(request, id=None):
@@ -882,40 +858,12 @@ def view_user_info(request, id=None):
     context['user_id'] = user.id
     context['user_date_joined'] = user.date_joined
     
-    context['user_historyevents'] = []
-    historyentry_qs = HistoryEntry.objects.filter(
-        Q(referenced_user_primary=user) | Q(referenced_user_secondary=user)
-    ).order_by("-occurence_time")
-    for historyentry in historyentry_qs:
-        context['user_historyevents'].append({
-            'occurence_time': historyentry.occurence_time,
-            'kind': historyentry.get_kind_nice(),
-            'note': historyentry.note,
-            'referenced_project': historyentry.referenced_project,
-            'referenced_faculty': historyentry.referenced_faculty,
-            'referenced_request': historyentry.referenced_request,
-            'referenced_user_primary': historyentry.referenced_user_primary,
-            'referenced_user_secondary': historyentry.referenced_user_secondary,
-            'glyphicon': historyentry.get_kind_glyphicon(),
-            'label': (
-                    historyentry.referenced_request and "Request: "+historyentry.referenced_request.project.title
-                or  historyentry.referenced_project and "Project: "+historyentry.referenced_project.title
-                or  historyentry.referenced_faculty and "Faculty: "+historyentry.referenced_faculty.name
-                or  "—"
-            ),
-            'referenced_enum': (
-                    historyentry.referenced_request and "request"
-                or  historyentry.referenced_project and "project"
-                or  historyentry.referenced_faculty and "faculty"
-                or  "—"
-            ),
-            'referenced_id': (
-                    historyentry.referenced_request and historyentry.referenced_request.id
-                or  historyentry.referenced_project and historyentry.referenced_project.id
-                or  historyentry.referenced_faculty and historyentry.referenced_faculty.id
-                or  -1
-            ),
-        })
+    context['user_historyevents'] = find_history(
+        HistoryEntry.objects.filter(
+            Q(referenced_user_primary=user) | Q(referenced_user_secondary=user)
+        ).order_by("-occurence_time"),
+        user
+    )
     
     project_membership_qs = ProjectMembership.objects.filter(member=user)
     project_qs = Project.objects.filter(projectmembership__in=project_membership_qs).order_by("update_time")
@@ -961,6 +909,8 @@ def view_user_info(request, id=None):
             'role_list': role_list
         })
     
+    context['comment_object'] = user
+    
     return render(request, template, context)
 
 @login_required(login_url='/login')
@@ -974,4 +924,7 @@ def view_error(request, error_msg):
     context['message'] = error_msg
     
     return render(request, template, context)
+
+def view_privilege(request):
+    return render(request, 'privilege.html', {})
 

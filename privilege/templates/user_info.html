@@ -8,145 +8,130 @@
 {% endblock %}
 
 {% block 'body' %}
-  <form id="project-form" action="" method="post">{% csrf_token %}
-    <div class="col-md-12">
-      <div class="dashboard-div">
-        <div class="well list-well">
-          <div class="row">
-            <div class="col-xs-2 project-info-title-label">
-              Name:
-            </div>
-            <div class="col-md-4 project-info-title">
-              {{ user_first_name }} {{ user_last_name }}
-            </div>
-            <div class="col-xs-2 project-info-title-label">
-              Join Date:
-            </div>
-            <div class="col-md-4 project-info-title">
-              {{ user_date_joined|localtime }}
-            </div>
+  <div class="col-md-12">
+    <div class="dashboard-div">
+      <div class="well list-well">
+        <div class="row">
+          <div class="col-xs-2 project-info-title-label">
+            Name:
           </div>
-          <!--<div class="row">
-            <div class="col-xs-2 project-info-detail-label">
-              Join Date:
-            </div>
-            <div class="col-md-9 project-info-detail">
-              {{ user_date_joined|localtime }}
-            </div>
-            <div class="col-md-1 project-info-title"></div>
-          </div>-->
+          <div class="col-md-4 project-info-title">
+            {{ user_first_name }} {{ user_last_name }}
+          </div>
+          <div class="col-xs-2 project-info-title-label">
+            Join Date:
+          </div>
+          <div class="col-md-4 project-info-subtitle">
+            {{ user_date_joined|localtime }}
+          </div>
+        </div>
+        <!--<div class="row">
+          <div class="col-xs-2 project-info-detail-label">
+            Join Date:
+          </div>
+          <div class="col-md-9 project-info-detail">
+            {{ user_date_joined|localtime }}
+          </div>
+          <div class="col-md-1 project-info-title"></div>
+        </div>-->
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="dashboard-div">
+      <ul class="nav nav-tabs">
+        <li class="active info-tab-header">
+          <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
+        </li>
+        <li class="info-tab-header">
+          <a href="#comments" data-toggle="tab"><span class="glyphicon glyphicon-comment dashboard-icon"></span>Comments</a>
+        </li>
+      </ul>
+      <div class="well list-well">
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="history">
+            {% if user_historyevents|length == 0 %}
+              <div class="notification-absence-text">
+                There is no history.
+              </div>
+            {% endif %}
+            {% for historyevent in user_historyevents %}
+              {% include "cards/historyentry.html" %}
+            {% endfor %}
+          </div>
+          <div class="tab-pane fade" id="comments">
+            {% include "cards/comments.html" with comment_object=comment_object %}
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="dashboard-div">
-        <ul class="nav nav-tabs">
-          <li class="active info-tab-header">
-            <a href="#history" data-toggle="tab"><span class="glyphicon glyphicon-time dashboard-icon"></span>History</a>
-          </li>
-        </ul>
-        <div class="well list-well">
-          <div class="tab-content">
-            <div class="tab-pane active" id="history">
-              {% for historyevent in user_historyevents %}
-                <div class="listEntry list-group-item">
+  </div>
+  <div class="col-md-6">
+    <div class="dashboard-div">
+      <ul class="nav nav-tabs">
+        <li class="info-tab-header active">
+          <a href="#project-list" data-toggle="tab"><span class="glyphicon glyphicon-list dashboard-icon"></span>Project List</a>
+        </li>
+        <li class="info-tab-header">
+          <a href="#faculty-list" data-toggle="tab"><span class="glyphicon glyphicon-bookmark dashboard-icon"></span>Faculty List</a>
+        </li>
+      </ul>
+      <div class="well list-well">
+        <div class="tab-content">
+          <div class="tab-pane fade in active" id="project-list">
+              {% for project in user_projects %}
+                <div class="listEntry list-group-item bubble">
                   <div class="row">
-                    <div class="col-xs-1 history-icon">
-                      <span class="glyphicon glyphicon-{{ historyevent.glyphicon }}"></span>
+                    <div class="listEntryTitle col-md-8">
+                      <a href="/project/{{ project.id }}">{{ project.title }}</a>
                     </div>
-                    <div class="col-xs-11">
-                      <div class="row">
-                        <div class="listEntryTitle col-xs-8">
-                          <a href="/{{ historyevent.referenced_enum }}/{{ historyevent.referenced_id }}">{{ historyevent.label }}</a>
-                        </div>
-                        <div class="listEntryDetail col-xs-4">
-                          {{ historyevent.occurence_time }}
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="listEntryDetail col-xs-8">
-                          {{ historyevent.note }}
-                        </div>
-                        <div class="listEntryDetail col-xs-4">
-                          {{ historyevent.referenced_user_primary }}
-                        </div>
-                      </div>
+                    <div class="listEntryTitle col-md-4">
+                      {{ project.update_time|date }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="listEntryTitle col-md-8">
+                      {{ project.faculty_name }}
+                    </div>
+                    <div class="listEntryTitle col-md-4">
+                      {{ project.user_role }}
                     </div>
                   </div>
                 </div>
               {% endfor %}
-            </div>
+          </div>
+          <div class="tab-pane fade" id="faculty-list">
+              {% for faculty in user_faculties %}
+                <div class="listEntry list-group-item bubble">
+                  <div class="row">
+                    <div class="listEntryTitle col-md-8">
+                      <a href="/project/{{ faculty.id }}">{{ faculty.name }}</a>
+                    </div>
+                    <div class="listEntryTitle col-md-4">
+                      {{ faculty.update_time }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="listEntryTitle col-md-12">
+                      {% for role in faculty.role_list %}
+                        {% if role.count != 0 %}
+                          <span>
+                            {% if role.count > 0 %}
+                              {{ role.name }}&nbsp;<span>({{ role.count }});</span>
+                            {% else %}
+                              {{ role.name }};
+                            {% endif %}
+                          </span>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="dashboard-div">
-        <ul class="nav nav-tabs">
-          <li class="info-tab-header active">
-            <a href="#project-list" data-toggle="tab"><span class="glyphicon glyphicon-list dashboard-icon"></span>Project List</a>
-          </li>
-          <li class="info-tab-header">
-            <a href="#faculty-list" data-toggle="tab"><span class="glyphicon glyphicon-th-list dashboard-icon"></span>Faculty List</a>
-          </li>
-        </ul>
-        <div class="well list-well">
-          <div class="tab-content">
-            <div class="tab-pane active" id="project-list">
-                {% for project in user_projects %}
-                  <div class="listEntry list-group-item">
-                    <div class="row">
-                      <div class="listEntryTitle col-md-8">
-                        <a href="/project/{{ project.id }}">{{ project.title }}</a>
-                      </div>
-                      <div class="listEntryTitle col-md-4">
-                        {{ project.update_time }}
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="listEntryTitle col-md-8">
-                        {{ project.faculty_name }}
-                      </div>
-                      <div class="listEntryTitle col-md-4">
-                        {{ project.user_role }}
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-            </div>
-            <div class="tab-pane" id="faculty-list">
-                {% for faculty in user_faculties %}
-                  <div class="listEntry list-group-item">
-                    <div class="row">
-                      <div class="listEntryTitle col-md-8">
-                        <a href="/project/{{ faculty.id }}">{{ faculty.name }}</a>
-                      </div>
-                      <div class="listEntryTitle col-md-4">
-                        {{ faculty.update_time }}
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="listEntryTitle col-md-12">
-                        {% for role in faculty.role_list %}
-                          {% if role.count != 0 %}
-                            <span>
-                              {% if role.count > 0 %}
-                                {{ role.name }}&nbsp;<span>({{ role.count }});</span>
-                              {% else %}
-                                {{ role.name }};
-                              {% endif %}
-                            </span>
-                          {% endif %}
-                        {% endfor %}
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </form>
+  </div>
 {% endblock %}
 

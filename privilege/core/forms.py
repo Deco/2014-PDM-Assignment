@@ -14,6 +14,10 @@ class FacultyForm(ModelForm):
         }
 
 class FacultyMembershipForm(ModelForm):
+    member = UserChoiceField(
+        queryset=User.objects.all(),
+        widget=Select(attrs={'class': 'member-select'})
+    )
     class Meta:
         model = FacultyMembership
         fields = ['member', 'role']

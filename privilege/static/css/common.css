@@ -33,20 +33,20 @@ body {
 
 #notification-box {
     min-height: 83px;
-    max-height: 300px;
+    /*max-height: 300px;*/
     overflow: auto;
 }
 
 #faculty-box {
     min-height: 15%;
-    /*max-height: 30%;*/
-    overflow: auto;
+    /*max-height: 300px;
+    overflow: auto;*/
 }
 
 #project-box {
     min-height: 30%;
-    /*max-height: 70%;*/
-    overflow: auto;
+    /*max-height: 70%;
+    overflow: auto;*/
 }
 
 .notification-absence-text {
@@ -104,6 +104,10 @@ body {
     color: inherit;
 }
 
+#id_comment {
+    width: 100%;
+}
+
 .edgebar {
     background-color: rgb(111, 84, 153);
     background-image: linear-gradient(rgb(86, 61, 124) 0px, rgb(111, 84, 153) 100%);
@@ -145,6 +149,13 @@ body {
     margin-left: 6px;
     width: 52px;
     height: 52px;
+}
+
+.comment-avatar {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 4px;
+    border: 1px solid #AAAAAA;
 }
 
 .header {
@@ -262,7 +273,8 @@ body {
 .history-icon {
     font-size: 30px;
     text-align: center;
-    padding-top: 5px;
+    padding-top: 0px;
+    padding-bottom: 4px;
 }
 
 .project-info-row {
@@ -275,6 +287,16 @@ body {
     border-right: 1px solid black;
 }
 
+.borderbottom {
+    border-bottom: 1px solid #CCCCCC;
+    border-radius: 6px;
+}
+.bubble {
+    border-left: 2px solid #888888;
+    border-right: 1px solid #BBBBBB;
+    border-radius: 8px;
+}
+
 .project-info-title-label {
     font-weight: bold;
     text-align: right;
@@ -283,6 +305,11 @@ body {
 }
 .project-info-title {
     font-size: 32px;
+    padding-bottom: 9px;
+}
+.project-info-subtitle {
+    font-size: 26px;
+    padding-top: 3px;
     padding-bottom: 9px;
 }
 

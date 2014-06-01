@@ -10,6 +10,8 @@
   <script src="{% static 'js/jquery.searchit.js' %}"></script>
   <script src="{% static 'js/chart.min.js' %}"></script><head>
   <script src="{% static 'js/bootstrap.min.js' %}"></script><head>
+  {% block 'head' %}
+  {% endblock %}
 </head>
 
 <body>
@@ -33,6 +35,17 @@
   <div class="edgebar footer">
     <div class="footer-content">Copyright 2014 &#x2014; Team Privileged</span>
   </div>
+  <script>
+    $(document).ready(function(){
+        var anchor = $.trim(window.location.hash);
+        $('a[href$="'+anchor+'"]').trigger('click');
+        
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+            history.replaceState('data', '', e.target.href);
+            //window.location.hash = e.target.attributes.href.value;
+        })
+    });
+  </script>
 </body>
 
 </html>
