@@ -62,7 +62,8 @@ def view_dashboard(request):
         context['projects'].append({
             'id': project.id,
             'title': project.title,
-            'faculty': project.faculty,
+            'faculty_id': project.faculty.id,
+            'faculty_name': project.faculty.name,
             'storage_capacity_mb': project.storage_capacity_mb,
             'storage_used_mb': project.storage_used_mb,
             'creation_time': project.creation_time,
