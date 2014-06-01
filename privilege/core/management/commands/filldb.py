@@ -20,7 +20,7 @@ class Command(BaseCommand):
             userCount = len(self.userChoices)
             for userI in range(userCount):
                 choice = self.userChoices[userI]
-                user = self._make_user(str(userI+1), choice[0], choice[1], choice[2], (userI == 0), choice[3])
+                user = self._make_user(str(userI+1), choice[0], choice[1], choice[2], (userI == 0))
                 userList.append(user)
                 record_history(kind=HistoryEntry.USER_CREATED,
                     note="Created with staff ID: {0}".format(userI+1),
@@ -48,14 +48,13 @@ class Command(BaseCommand):
                         zip(randomUsers, ['P','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M','R','C','R','C','M','R','C','M'])
                     )
     
-    def _make_user(self, username, first_name, last_name, password, is_admin, email):
+    def _make_user(self, username, first_name, last_name, password, is_admin):
         print(username, first_name, last_name, password)
         return self._make(User,
             username=username,
             first_name=first_name, last_name=last_name,
             password=make_password(password),
-            is_staff=is_admin, is_superuser=is_admin,
-            email = email
+            is_staff=is_admin, is_superuser=is_admin
         )
     
     def _make_faculty(self, name, members):
@@ -133,7 +132,7 @@ class Command(BaseCommand):
         self._fill_db()
     
     userChoices = [
-        ('Cornelius', 'Chase', 'password', 'deco.da.man@gmail.com'),
+        ('Cornelius', 'Chase', 'password'),
         ('Dee', 'Doss', 'h4cker'),
         ('Mary', 'Poppins', 'penguins!'),
         ('Edward', 'Von Hamburger', 'aka jake'),
